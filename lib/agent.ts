@@ -72,7 +72,7 @@ CONFIANZA INICIAL CALCULADA: ${confidence.toFixed(2)}
 Toma una decisión fundamentada basada en toda la evidencia disponible.`;
 
   const { object } = await generateObject({
-    model: openrouter.chat("deepseek/deepseek-chat-v3-0324:free"),
+    model: openrouter.chat("google/gemma-4-31b-it:free"),
     schema: decisionSchema,
     prompt,
   });
