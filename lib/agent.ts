@@ -10,6 +10,7 @@ import { computeConfidence, shouldEscalate } from "./confidence";
 const openrouter = createOpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENROUTER_API_KEY ?? "",
+  compatibility: "compatible", // OpenRouter usa /v1/chat/completions, no /v1/responses
 });
 
 export type Decision = "approve" | "reject" | "escalate";
@@ -72,7 +73,7 @@ CONFIANZA INICIAL CALCULADA: ${confidence.toFixed(2)}
 Toma una decisión fundamentada basada en toda la evidencia disponible.`;
 
   const { object } = await generateObject({
-    model: openrouter("meta-llama/llama-3.1-8b-instruct:free"),
+    model: openrouter("meta-llama/llama-3.3-70b-instruct:free"),
     schema: decisionSchema,
     prompt,
   });
