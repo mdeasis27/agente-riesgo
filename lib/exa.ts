@@ -1,6 +1,6 @@
-// Cliente Exa.ai — búsqueda profunda de personas y empresas
+import Exa from "exa-js";
 
-const EXA_BASE = "https://api.exa.ai";
+// ─── Tipos públicos ────────────────────────────────────────────────────────────
 
 export interface ExaResult {
   title: string;
@@ -11,7 +11,98 @@ export interface ExaResult {
   author?: string;
 }
 
-async function search(query: string, numResults = 5): Promise<ExaResult[]> {
+// ─── Estrategias por contexto ─────────────────────────────────────────────────
+
+interface SearchQuery {
+  query: string;
+  category?: "news" | "people" | "company";
+  numResults: number;
+}
+
+function getStrategyForContext(
+  name: string,
+  country: string,
+  context?: string
+): SearchQuery[] {
+  const ctx = context ?? "onboarding";
+
+  if (ctx === "credito") {
+    return [
+      {
+        query: `${name} ${country} fraude deuda insolvencia`,
+        category: "news",
+        numResults: 4,
+      },
+      {
+        query: `${name} demanda judicial embargo financiero`,
+        category: "news",
+        numResults: 4,
+      },
+      {
+        query: `${name} ${country} riesgo crediticio historial`,
+        numResults: 4,
+      },
+    ];
+  }
+
+  if (ctx === "contratacion") {
+    return [
+      {
+        query: `${name} trayectoria profesional experiencia`,
+        category: "people",
+        numResults: 4,
+      },
+      {
+        query: `${name} demanda laboral fraude empresa`,
+        category: "news",
+        numResults: 4,
+      },
+      {
+        query: `${name} ${country} perfil ejecutivo directivo`,
+        numResults: 4,
+      },
+    ];
+  }
+
+  // onboarding (default)
+  return [
+    {
+      query: `${name} ${country} sanciones lista negra PEP`,
+      category: "news",
+      numResults: 4,
+    },
+    {
+      query: `${name} lavado dinero corrupción`,
+      category: "news",
+      numResults: 4,
+    },
+    {
+      query: `${name} identidad digital presencia web`,
+      numResults: 4,
+    },
+  ];
+}
+
+// ─── Deduplicación ────────────────────────────────────────────────────────────
+
+function deduplicateByUrl(results: ExaResult[]): ExaResult[] {
+  const byUrl = new Map<string, ExaResult>();
+  for (const r of results) {
+    const existing = byUrl.get(r.url);
+    if (!existing || r.score > existing.score) {
+      byUrl.set(r.url, r);
+    }
+  }
+  return Array.from(byUrl.values());
+}
+
+// ─── API pública ──────────────────────────────────────────────────────────────
+
+export async function searchSubject(params: {
+  name: string;
+  context?: string;
+  country?: string;
+}): Promise<ExaResult[]> {
   if (!process.env.EXA_API_KEY) {
     return [
       {
@@ -23,37 +114,35 @@ async function search(query: string, numResults = 5): Promise<ExaResult[]> {
     ];
   }
 
-  const res = await fetch(`${EXA_BASE}/search`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": process.env.EXA_API_KEY,
-    },
-    body: JSON.stringify({
-      query,
-      numResults,
-      type: "neural",
-      useAutoprompt: true,
-      contents: { text: { maxCharacters: 2000 } },
-    }),
+  const exa = new Exa(process.env.EXA_API_KEY);
+  const queries = getStrategyForContext(
+    params.name,
+    params.country ?? "",
+    params.context
+  );
+
+  const settled = await Promise.allSettled(
+    queries.map(({ query, category, numResults }) =>
+      exa.searchAndContents(query, {
+        type: "auto",
+        ...(category ? { category } : {}),
+        numResults,
+        highlights: { maxCharacters: 1500 },
+      })
+    )
+  );
+
+  const all: ExaResult[] = settled.flatMap((result) => {
+    if (result.status === "rejected") return [];
+    return result.value.results.map((r) => ({
+      title: r.title ?? "",
+      url: r.url,
+      text: Array.isArray(r.highlights) ? r.highlights.join(" ") : "",
+      score: r.score ?? 0,
+      publishedDate: r.publishedDate ?? undefined,
+      author: r.author ?? undefined,
+    }));
   });
 
-  if (!res.ok) throw new Error(`Exa error: ${res.status}`);
-  const data = await res.json();
-  return data.results as ExaResult[];
-}
-
-export async function searchSubject(params: {
-  name: string;
-  context?: string;
-  country?: string;
-}) {
-  const queries = [
-    `${params.name} ${params.country ?? ""} noticias fraude riesgo`,
-    `${params.name} historial profesional trayectoria`,
-    `${params.name} ${params.context ?? ""}`,
-  ];
-
-  const results = await Promise.all(queries.map((q) => search(q)));
-  return results.flat();
+  return deduplicateByUrl(all);
 }
