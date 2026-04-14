@@ -1,6 +1,6 @@
 // Motor principal del agente de riesgo — razonamiento + decisión + escalamiento
 
-import { generateObject } from "ai";
+import { generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
 import type { TruoraVerification } from "./truora";
@@ -53,7 +53,7 @@ export async function evaluateCase(params: {
     .filter((r) => r.url !== "#")
     .map((r) => r.url);
 
-  const prompt = `Eres un agente experto en decisiones de riesgo. Analiza la evidencia (validación de identidad Truora + búsqueda web Exa.ai) y toma una decisión sobre la solicitud.
+  const prompt = `Eres un agente experto en decisiones de riesgo. Analiza la evidencia y toma una decisión sobre la solicitud.
 
 SUJETO: ${params.name}
 CONTEXTO: ${params.context}
@@ -69,13 +69,25 @@ ${webEvidence}
 
 CONFIANZA INICIAL CALCULADA: ${confidence.toFixed(2)}
 
-Toma una decisión fundamentada basada en toda la evidencia disponible.`;
+Responde ÚNICAMENTE con un objeto JSON válido, sin markdown ni texto adicional:
+{
+  "decision": "approve" | "reject" | "escalate",
+  "confidence": número entre 0 y 1,
+  "reasoning": "razonamiento completo en español",
+  "red_flags": ["señal negativa 1", "señal negativa 2"],
+  "positive_signals": ["señal positiva 1"],
+  "escalation_reason": "motivo de escalamiento si aplica, omitir si no"
+}`;
 
-  const { object } = await generateObject({
+  const { text } = await generateText({
     model: openrouter.chat("google/gemma-4-31b-it:free"),
-    schema: decisionSchema,
     prompt,
   });
+
+  // Extraer JSON de posibles bloques markdown (```json ... ```)
+  const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const raw = (jsonMatch ? jsonMatch[1] : text).trim();
+  const object = decisionSchema.parse(JSON.parse(raw));
 
   let finalDecision = object.decision;
   if (shouldEscalate(object.confidence) && finalDecision !== "escalate") {
