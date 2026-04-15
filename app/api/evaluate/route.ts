@@ -3,13 +3,37 @@ import { runVerification } from "@/lib/truora";
 import { searchSubject } from "@/lib/exa";
 import { evaluateCase } from "@/lib/agent";
 
+const VALID_CONTEXTS = ["credito", "contratacion", "onboarding"] as const;
+
+function sanitize(value: unknown, maxLength = 200): string {
+  if (typeof value !== "string") return "";
+  return value.replace(/[\r\n\t\x00-\x1F\x7F]/g, " ").slice(0, maxLength).trim();
+}
+
 export async function POST(req: NextRequest) {
+  const apiKey = process.env.INTERNAL_API_KEY;
+  if (apiKey && req.headers.get("x-api-key") !== apiKey) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
   try {
-    const { name, document_id, country, context } = await req.json();
+    const body = await req.json();
+
+    const name = sanitize(body.name);
+    const country = sanitize(body.country);
+    const document_id = body.document_id ? sanitize(body.document_id, 100) : undefined;
+    const context = sanitize(body.context, 50) || "credito";
 
     if (!name || !country) {
       return NextResponse.json(
         { error: "name y country son requeridos" },
+        { status: 400 }
+      );
+    }
+
+    if (!VALID_CONTEXTS.includes(context as (typeof VALID_CONTEXTS)[number])) {
+      return NextResponse.json(
+        { error: "context debe ser uno de: credito, contratacion, onboarding" },
         { status: 400 }
       );
     }
@@ -21,7 +45,7 @@ export async function POST(req: NextRequest) {
 
     const decision = await evaluateCase({ name, context, truora, exaResults });
 
-    const case_id = "case_" + Date.now();
+    const case_id = crypto.randomUUID();
 
     return NextResponse.json({
       case_id,

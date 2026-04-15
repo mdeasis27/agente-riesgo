@@ -15,7 +15,7 @@ export interface ExaResult {
 
 interface SearchQuery {
   query: string;
-  category?: "news" | "people" | "company";
+  category?: "news" | "people";
   numResults: number;
 }
 
@@ -137,7 +137,10 @@ export async function searchSubject(params: {
     return result.value.results.map((r) => ({
       title: r.title ?? "",
       url: r.url,
-      text: Array.isArray(r.highlights) ? r.highlights.join(" ") : "",
+      text:
+        Array.isArray(r.highlights) && r.highlights.length > 0
+          ? r.highlights.join(" ")
+          : (r.text ?? ""),
       score: r.score ?? 0,
       publishedDate: r.publishedDate ?? undefined,
       author: r.author ?? undefined,
