@@ -1,388 +1,285 @@
-"use client";
+import Link from "next/link";
 
-import { useState } from "react";
-import type { AgentDecision } from "@/lib/agent";
-import { DecisionBadge } from "@/components/DecisionBadge";
-
-interface CaseResult {
-  case_id: string;
-  subject: string;
-  country: string;
-  context: string;
-  decision: AgentDecision;
-}
-
-const CONTEXT_LABELS: Record<string, string> = {
-  credito: "Crédito",
-  contratacion: "Contratación",
-  onboarding: "Onboarding",
-};
-
-export default function Home() {
-  const [cases, setCases] = useState<CaseResult[]>([]);
-  const [selectedCase, setSelectedCase] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const [name, setName] = useState("");
-  const [country, setCountry] = useState("");
-  const [document, setDocument] = useState("");
-  const [context, setContext] = useState("credito");
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      const res = await fetch("/api/evaluate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          country,
-          document_id: document || undefined,
-          context,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || data.error) {
-        setError(data.error ?? "Error desconocido al evaluar el caso.");
-        return;
-      }
-
-      const newCase: CaseResult = {
-        case_id: data.case_id,
-        subject: data.subject,
-        country: data.country,
-        context: data.context,
-        decision: data.decision,
-      };
-
-      setCases((prev) => [newCase, ...prev]);
-      setSelectedCase(newCase.case_id);
-      setName("");
-      setCountry("");
-      setDocument("");
-      setContext("credito");
-    } catch {
-      setError("No se pudo conectar con el servidor.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function toggleCase(id: string) {
-    setSelectedCase((prev) => (prev === id ? null : id));
-  }
-
-  const activeCase = cases.find((c) => c.case_id === selectedCase) ?? null;
-
+export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-zinc-900">
-            Agente de Riesgo
-          </h1>
-          <p className="mt-1 text-zinc-500 text-sm">
-            Evalúa solicitudes de crédito, contratación y onboarding con IA.
-            El agente recopila evidencia, razona y decide automáticamente o
-            escala a revisión humana.
-          </p>
-        </div>
+    <div className="min-h-screen bg-slate-900 text-slate-50">
+      {/* ── HERO ─────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden">
+        {/* Gradiente radial de fondo */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 80% 50% at 50% -10%, rgba(139,92,246,0.18) 0%, transparent 70%)",
+          }}
+        />
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          {/* Columna izquierda — Formulario */}
-          <div className="space-y-6">
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold text-zinc-800">
-                Nueva solicitud
-              </h2>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-medium text-zinc-700 mb-1"
-                  >
-                    Nombre del sujeto{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="name"
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Ej. Juan García Pérez"
-                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="country"
-                    className="block text-sm font-medium text-zinc-700 mb-1"
-                  >
-                    País <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="country"
-                    type="text"
-                    required
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    placeholder="Ej. México"
-                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="document"
-                    className="block text-sm font-medium text-zinc-700 mb-1"
-                  >
-                    Documento{" "}
-                    <span className="text-zinc-400 font-normal">(opcional)</span>
-                  </label>
-                  <input
-                    id="document"
-                    type="text"
-                    value={document}
-                    onChange={(e) => setDocument(e.target.value)}
-                    placeholder="Ej. CURP, DNI, pasaporte"
-                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="context"
-                    className="block text-sm font-medium text-zinc-700 mb-1"
-                  >
-                    Tipo de contexto
-                  </label>
-                  <select
-                    id="context"
-                    value={context}
-                    onChange={(e) => setContext(e.target.value)}
-                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 bg-white"
-                  >
-                    <option value="credito">Crédito</option>
-                    <option value="contratacion">Contratación</option>
-                    <option value="onboarding">Onboarding</option>
-                  </select>
-                </div>
-
-                {error && (
-                  <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-                    {error}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {loading ? "Recopilando evidencia y razonando..." : "Evaluar"}
-                </button>
-              </form>
+        {/* Nav */}
+        <nav className="relative mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/20">
+              <svg
+                className="h-4 w-4 text-amber-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.8}
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"
+                />
+              </svg>
             </div>
+            <span className="text-sm font-bold text-slate-100">Agente de Riesgo</span>
+          </div>
+          <a
+            href="https://github.com/mdeasis27/agente-riesgo"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-colors duration-200"
+          >
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z" />
+            </svg>
+            GitHub
+          </a>
+        </nav>
 
-            {/* Panel de detalle del caso (desktop: bajo el form) */}
-            {activeCase && (
-              <CaseDetail caseResult={activeCase} />
+        {/* Hero content */}
+        <div className="relative mx-auto max-w-3xl px-6 pt-16 pb-24 text-center">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-4 py-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-violet-400 animate-pulse" aria-hidden="true" />
+            <span className="text-xs font-medium text-violet-300">
+              Motor de decisión con IA · Portafolio 2026
+            </span>
+          </div>
+
+          <h1 className="text-4xl font-extrabold tracking-tight text-slate-50 sm:text-5xl lg:text-6xl">
+            Decisiones de riesgo en{" "}
+            <span className="bg-gradient-to-r from-violet-400 to-violet-200 bg-clip-text text-transparent">
+              segundos, no días
+            </span>
+          </h1>
+
+          <p className="mt-6 text-lg leading-relaxed text-slate-400 max-w-xl mx-auto">
+            Un agente de IA que recopila evidencia, verifica identidad y razona
+            sobre solicitudes de crédito, contratación y onboarding — de forma
+            autónoma o escalando a revisión humana.
+          </p>
+
+          <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <Link
+              href="/app"
+              className="flex items-center gap-2 rounded-xl bg-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 hover:bg-violet-500 hover:shadow-violet-500/35 transition-all duration-200"
+            >
+              Ver demo en vivo
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+              </svg>
+            </Link>
+            <a
+              href="https://github.com/mdeasis27/agente-riesgo"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-slate-300 hover:bg-white/10 hover:text-white transition-all duration-200"
+            >
+              Ver en GitHub
+            </a>
+          </div>
+
+          {/* Tech stack badges */}
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
+            {["Next.js 15", "OpenRouter", "Exa.ai", "Truora", "TypeScript", "Tailwind v4"].map(
+              (tech) => (
+                <span
+                  key={tech}
+                  className="rounded-full border border-white/8 bg-white/5 px-3 py-1 text-xs font-medium text-slate-400"
+                >
+                  {tech}
+                </span>
+              )
             )}
           </div>
+        </div>
+      </section>
 
-          {/* Columna derecha — Lista de casos */}
-          <div>
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold text-zinc-800">
-                Casos evaluados{" "}
-                {cases.length > 0 && (
-                  <span className="ml-1 text-sm font-normal text-zinc-400">
-                    ({cases.length})
+      {/* ── CÓMO FUNCIONA ────────────────────────────────────── */}
+      <section className="mx-auto max-w-6xl px-6 py-20">
+        <div className="mb-12 text-center">
+          <h2 className="text-2xl font-bold text-slate-100 sm:text-3xl">Cómo funciona</h2>
+          <p className="mt-3 text-slate-400">Tres pasos para una decisión fundamentada</p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-3">
+          {[
+            {
+              step: "01",
+              color: "violet",
+              title: "Recopila evidencia",
+              description:
+                "Busca información pública relevante sobre el sujeto usando búsqueda semántica avanzada.",
+              tech: "Exa.ai · búsqueda semántica",
+              bg: "bg-violet-500/10 border-violet-500/20",
+              text: "text-violet-300",
+              pill: "bg-violet-500/10 border-violet-500/20 text-violet-400",
+              connector: "text-violet-500/30",
+            },
+            {
+              step: "02",
+              color: "amber",
+              title: "Verifica identidad",
+              description:
+                "Valida la identidad del sujeto y consulta listas de sanciones, PEP y antecedentes judiciales.",
+              tech: "Truora · background check",
+              bg: "bg-amber-500/10 border-amber-500/20",
+              text: "text-amber-300",
+              pill: "bg-amber-500/10 border-amber-500/20 text-amber-400",
+              connector: "text-amber-500/30",
+            },
+            {
+              step: "03",
+              color: "emerald",
+              title: "Razona y decide",
+              description:
+                "Un LLM analiza toda la evidencia y genera una decisión fundamentada: aprobar, rechazar o escalar.",
+              tech: "OpenRouter · LLM",
+              bg: "bg-emerald-500/10 border-emerald-500/20",
+              text: "text-emerald-300",
+              pill: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
+              connector: "",
+            },
+          ].map((item, idx) => (
+            <div key={idx} className="relative">
+              <div className={`rounded-2xl border p-6 ${item.bg} h-full`}>
+                <div className="mb-4 flex items-center justify-between">
+                  <span className={`text-4xl font-black ${item.text} opacity-40`}>{item.step}</span>
+                  <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${item.pill}`}>
+                    {item.tech}
                   </span>
-                )}
-              </h2>
-
-              {cases.length === 0 ? (
-                <div className="py-12 text-center">
-                  <p className="text-sm text-zinc-400">
-                    Aún no hay casos evaluados en esta sesión.
-                  </p>
-                  <p className="mt-1 text-xs text-zinc-300">
-                    Completa el formulario para evaluar una solicitud.
-                  </p>
                 </div>
-              ) : (
-                <ul className="space-y-2">
-                  {cases.map((c) => (
-                    <li key={c.case_id}>
-                      <button
-                        onClick={() => toggleCase(c.case_id)}
-                        className={`w-full rounded-lg border px-4 py-3 text-left transition-colors hover:bg-zinc-50 ${
-                          selectedCase === c.case_id
-                            ? "border-zinc-400 bg-zinc-50"
-                            : "border-zinc-200 bg-white"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-zinc-900">
-                              {c.subject}
-                            </p>
-                            <p className="mt-0.5 text-xs text-zinc-400">
-                              {CONTEXT_LABELS[c.context] ?? c.context} ·{" "}
-                              {c.country}
-                            </p>
-                          </div>
-                          <div className="flex shrink-0 flex-col items-end gap-1">
-                            <DecisionBadge decision={c.decision.decision} />
-                            <span className="text-xs text-zinc-400">
-                              {(c.decision.confidence * 100).toFixed(0)}% confianza
-                            </span>
-                          </div>
-                        </div>
-                      </button>
-
-                      {/* Detalle expandible en mobile (bajo cada item) */}
-                      {selectedCase === c.case_id && (
-                        <div className="lg:hidden mt-2">
-                          <CaseDetail caseResult={c} />
-                        </div>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+                <h3 className="mb-2 text-base font-bold text-slate-100">{item.title}</h3>
+                <p className="text-sm leading-relaxed text-slate-400">{item.description}</p>
+              </div>
+              {/* Conector entre pasos */}
+              {idx < 2 && (
+                <div className="absolute -right-3 top-1/2 z-10 hidden -translate-y-1/2 md:block">
+                  <svg className={`h-6 w-6 ${item.connector}`} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                  </svg>
+                </div>
               )}
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── CONTEXTOS DISPONIBLES ────────────────────────────── */}
+      <section className="mx-auto max-w-6xl px-6 py-12">
+        <div className="mb-10 text-center">
+          <h2 className="text-2xl font-bold text-slate-100 sm:text-3xl">Contextos disponibles</h2>
+          <p className="mt-3 text-slate-400">El agente adapta su razonamiento según el caso de uso</p>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-3">
+          {[
+            {
+              title: "Crédito",
+              description:
+                "Detecta fraude, deudas impagas y riesgo crediticio. Integra historial financiero público y señales de comportamiento.",
+              gradient: "from-violet-500/10 to-violet-500/5",
+              border: "border-violet-500/20",
+              accent: "text-violet-400",
+              icon: (
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+                </svg>
+              ),
+            },
+            {
+              title: "Contratación",
+              description:
+                "Valida trayectoria laboral, detecta litigios laborales activos y verifica referencias en fuentes públicas.",
+              gradient: "from-amber-500/10 to-amber-500/5",
+              border: "border-amber-500/20",
+              accent: "text-amber-400",
+              icon: (
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0 1 12 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 0 1-.673-.38m0 0A2.18 2.18 0 0 1 3 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 0 1 3.413-.387m7.5 0V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v.894m7.5 0a48.667 48.667 0 0 0-7.5 0M12 12.75h.008v.008H12v-.008Z" />
+                </svg>
+              ),
+            },
+            {
+              title: "Onboarding",
+              description:
+                "Verifica identidad, detecta PEP y sanciones internacionales. Cumplimiento KYC/AML en tiempo real.",
+              gradient: "from-emerald-500/10 to-emerald-500/5",
+              border: "border-emerald-500/20",
+              accent: "text-emerald-400",
+              icon: (
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                </svg>
+              ),
+            },
+          ].map((ctx) => (
+            <div
+              key={ctx.title}
+              className={`rounded-2xl border bg-gradient-to-br p-6 ${ctx.border} ${ctx.gradient}`}
+            >
+              <div className={`mb-3 inline-flex rounded-lg p-2 ${ctx.gradient} border ${ctx.border}`}>
+                <span className={ctx.accent}>{ctx.icon}</span>
+              </div>
+              <h3 className="mb-2 text-base font-bold text-slate-100">{ctx.title}</h3>
+              <p className="text-sm leading-relaxed text-slate-400">{ctx.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── CTA FINAL ────────────────────────────────────────── */}
+      <section className="relative overflow-hidden py-24">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 80% 60% at 50% 110%, rgba(139,92,246,0.15) 0%, transparent 70%)",
+          }}
+        />
+        <div className="relative mx-auto max-w-2xl px-6 text-center">
+          <h2 className="text-3xl font-bold text-slate-50 sm:text-4xl">
+            Pruébalo en segundos
+          </h2>
+          <p className="mt-4 text-slate-400">
+            Sin registro. Sin configuración. Los casos demo funcionan sin API keys.
+          </p>
+          <div className="mt-8">
+            <Link
+              href="/app"
+              className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 hover:bg-violet-500 hover:shadow-violet-500/35 transition-all duration-200"
+            >
+              Abrir la app
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+              </svg>
+            </Link>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
+      </section>
 
-function CaseDetail({ caseResult }: { caseResult: CaseResult }) {
-  const d = caseResult.decision;
-
-  return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm space-y-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="text-base font-semibold text-zinc-900">
-            {caseResult.subject}
-          </h3>
-          <p className="text-xs text-zinc-400">
-            {CONTEXT_LABELS[caseResult.context] ?? caseResult.context} ·{" "}
-            {caseResult.country} · ID: {caseResult.case_id}
-          </p>
+      {/* ── FOOTER ───────────────────────────────────────────── */}
+      <footer className="border-t border-white/5 py-8">
+        <div className="mx-auto max-w-6xl px-6 flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
+          <span className="text-xs text-slate-600">Agente de Riesgo · Portafolio 2026</span>
+          <span className="text-xs text-slate-600">
+            Construido con Next.js · OpenRouter · Exa.ai · Truora
+          </span>
         </div>
-        <DecisionBadge decision={d.decision} />
-      </div>
-
-      {/* Confianza */}
-      <div>
-        <p className="text-xs font-medium text-zinc-500 mb-1">
-          Confianza: {(d.confidence * 100).toFixed(0)}%
-        </p>
-        <div className="h-2 w-full rounded-full bg-zinc-100 overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all ${
-              d.decision === "approve"
-                ? "bg-green-500"
-                : d.decision === "reject"
-                ? "bg-red-500"
-                : "bg-yellow-400"
-            }`}
-            style={{ width: `${(d.confidence * 100).toFixed(0)}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Razonamiento */}
-      <div>
-        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1">
-          Razonamiento
-        </p>
-        <p className="text-sm text-zinc-700 leading-relaxed">{d.reasoning}</p>
-      </div>
-
-      {/* Escalation reason */}
-      {d.escalation_reason && (
-        <div className="rounded-lg bg-yellow-50 border border-yellow-200 px-4 py-3">
-          <p className="text-xs font-semibold text-yellow-700 uppercase tracking-wide mb-1">
-            Motivo de escalamiento
-          </p>
-          <p className="text-sm text-yellow-800">{d.escalation_reason}</p>
-        </div>
-      )}
-
-      {/* Red flags */}
-      {d.red_flags.length > 0 && (
-        <div>
-          <p className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-1">
-            Señales de alerta
-          </p>
-          <ul className="space-y-1">
-            {d.red_flags.map((flag, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-red-700">
-                <span className="mt-1 shrink-0 h-1.5 w-1.5 rounded-full bg-red-500" />
-                {flag}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Positive signals */}
-      {d.positive_signals.length > 0 && (
-        <div>
-          <p className="text-xs font-semibold text-green-600 uppercase tracking-wide mb-1">
-            Señales positivas
-          </p>
-          <ul className="space-y-1">
-            {d.positive_signals.map((signal, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-2 text-sm text-green-700"
-              >
-                <span className="mt-1 shrink-0 h-1.5 w-1.5 rounded-full bg-green-500" />
-                {signal}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Evidence sources */}
-      {d.evidence_sources.length > 0 && (
-        <div>
-          <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1">
-            Fuentes de evidencia
-          </p>
-          <ul className="space-y-1">
-            {d.evidence_sources.map((url, i) => (
-              <li key={i}>
-                <a
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-zinc-500 hover:text-zinc-800 underline break-all"
-                >
-                  {url}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      </footer>
     </div>
   );
 }

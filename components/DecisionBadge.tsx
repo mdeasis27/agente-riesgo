@@ -1,9 +1,9 @@
 import type { Decision } from "@/lib/agent";
 
 const STYLES: Record<Decision, string> = {
-  approve: "bg-green-50 text-green-700 border-green-200",
-  reject: "bg-red-50 text-red-700 border-red-200",
-  escalate: "bg-yellow-50 text-yellow-700 border-yellow-200",
+  approve: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+  reject: "bg-red-500/15 text-red-400 border-red-500/30",
+  escalate: "bg-amber-500/15 text-amber-400 border-amber-500/30",
 };
 
 const LABELS: Record<Decision, string> = {
@@ -15,6 +15,7 @@ const LABELS: Record<Decision, string> = {
 export function DecisionBadge({ decision }: { decision: Decision }) {
   return (
     <span
+      aria-label={`Decisión: ${LABELS[decision]}`}
       className={`inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium ${STYLES[decision]}`}
     >
       {LABELS[decision]}
