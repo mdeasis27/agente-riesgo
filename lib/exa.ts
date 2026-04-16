@@ -140,7 +140,7 @@ export async function searchSubject(params: {
       text:
         Array.isArray(r.highlights) && r.highlights.length > 0
           ? r.highlights.join(" ")
-          : (r.text ?? ""),
+          : ((r as unknown as { text?: string }).text ?? ""),
       score: r.score ?? 0,
       publishedDate: r.publishedDate ?? undefined,
       author: r.author ?? undefined,
