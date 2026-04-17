@@ -1,13 +1,25 @@
 {
   "kit": "ai",
-  "syncedAt": "2026-04-17T12:10:54.281Z",
+  "syncedAt": "2026-04-17T19:07:55.190Z",
   "sourcePath": "C:\\Proyectos\\proyectos-portafolio\\portafolio-mdea\\ai-kit",
   "files": [
     "CHANGELOG.md",
     "README.md",
+    "byok-input.tsx",
+    "client.legacy.ts",
     "client.ts",
     "demo-mode.ts",
+    "errors.ts",
     "models.ts",
-    "rate-limit.tsx"
+    "provider-badge.tsx",
+    "providers\\anthropic.ts",
+    "providers\\base.ts",
+    "providers\\gemini.ts",
+    "providers\\openai-compat.ts",
+    "rate-limit-notice.tsx",
+    "rate-limit.ts",
+    "rate-limit.tsx",
+    "router.ts",
+    "types.ts"
   ]
 }
