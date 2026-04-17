@@ -66,6 +66,7 @@ export function EvaluationTimeline({
     if (!isRunning) {
       // Solo resetear si no hubo una evaluación completada — evita borrar pasos 1 y 2 al completar
       if (!isComplete) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSteps((prev) => prev.map((s) => ({ ...s, status: "pending", pill: undefined })));
       }
       return;
@@ -131,6 +132,7 @@ export function EvaluationTimeline({
   // Cuando la API completa: paso 3 → done, paso 4 → done
   useEffect(() => {
     if (!isComplete) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSteps((prev) =>
       prev.map((s) => {
         if (s.id === 3) return { ...s, status: "done", pill: "Decisión generada" };

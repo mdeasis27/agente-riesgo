@@ -20,8 +20,7 @@ export interface RiskCase {
   resolved_at?: string;
 }
 
-export interface CaseListItem
-  extends Pick<
-    RiskCase,
-    "id" | "subject_name" | "status" | "confidence" | "created_at"
-  > {}
+export type CaseListItem = Pick<
+  RiskCase,
+  "id" | "subject_name" | "status" | "confidence" | "created_at"
+>;

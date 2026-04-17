@@ -1,0 +1,13 @@
+{
+  "kit": "ai",
+  "syncedAt": "2026-04-17T12:10:54.281Z",
+  "sourcePath": "C:\\Proyectos\\proyectos-portafolio\\portafolio-mdea\\ai-kit",
+  "files": [
+    "CHANGELOG.md",
+    "README.md",
+    "client.ts",
+    "demo-mode.ts",
+    "models.ts",
+    "rate-limit.tsx"
+  ]
+}

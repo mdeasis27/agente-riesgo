@@ -10,7 +10,7 @@ export interface TruoraVerification {
   judicial_records: boolean;
 }
 
-function getMockVerification(params: {
+function getMockVerification(_params: {
   name: string;
   country: string;
 }): TruoraVerification {
