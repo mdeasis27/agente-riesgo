@@ -145,8 +145,8 @@ export function EvaluationTimeline({
   if (!isRunning && !isComplete) return null;
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
-      <p className="mb-5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+    <div className="rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] bg-card p-6">
+      <p className="mb-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Proceso de evaluación
       </p>
 
@@ -159,7 +159,7 @@ export function EvaluationTimeline({
               {idx < steps.length - 1 && (
                 <div
                   className={`mt-1 w-px flex-1 min-h-[28px] transition-colors duration-500 ${
-                    step.status === "done" ? "bg-violet-500/40" : "bg-white/10"
+                    step.status === "done" ? "bg-[var(--accent)]/40" : "bg-[var(--border)]"
                   }`}
                 />
               )}
@@ -171,24 +171,22 @@ export function EvaluationTimeline({
                 <p
                   className={`text-sm font-semibold transition-colors duration-300 ${
                     step.status === "done"
-                      ? "text-slate-200"
+                      ? "text-foreground"
                       : step.status === "active"
-                      ? "text-white"
-                      : "text-slate-500"
+                      ? "text-foreground"
+                      : "text-muted-foreground"
                   }`}
                 >
                   {step.label}
                 </p>
                 {step.pill && (
-                  <span className="rounded-full bg-violet-500/15 border border-violet-500/25 px-2.5 py-0.5 text-xs font-medium text-violet-300 animate-fade-in">
+                  <span className="rounded-full bg-[var(--accent)]/10 border border-[var(--accent)]/20 px-2.5 py-0.5 text-xs font-medium text-[var(--accent)] animate-fade-in">
                     {step.pill}
                   </span>
                 )}
               </div>
               <p
-                className={`mt-0.5 text-xs transition-colors duration-300 ${
-                  step.status === "pending" ? "text-slate-700" : "text-slate-500"
-                }`}
+                className={`mt-0.5 text-xs transition-colors duration-300 text-muted-foreground`}
               >
                 {step.description}
               </p>
@@ -203,7 +201,7 @@ export function EvaluationTimeline({
 function StepIcon({ status }: { status: StepStatus }) {
   if (status === "done") {
     return (
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-600 border border-violet-400/40 transition-all duration-300">
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] border border-[var(--accent)]/40 transition-all duration-300">
         <svg
           className="h-3.5 w-3.5 text-white"
           fill="none"
@@ -220,9 +218,9 @@ function StepIcon({ status }: { status: StepStatus }) {
 
   if (status === "active") {
     return (
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-violet-500/50 bg-violet-500/10">
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--accent)]/50 bg-[var(--accent)]/10">
         <svg
-          className="h-4 w-4 animate-spin text-violet-400"
+          className="h-4 w-4 animate-spin text-[var(--accent)]"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
@@ -236,8 +234,8 @@ function StepIcon({ status }: { status: StepStatus }) {
 
   // pending
   return (
-    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5">
-      <div className="h-2 w-2 rounded-full bg-slate-700" />
+    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full shadow-[var(--shadow-border-light)] bg-background">
+      <div className="h-2 w-2 rounded-full bg-[var(--gray-100)]" />
     </div>
   );
 }
