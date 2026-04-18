@@ -7,6 +7,11 @@ import type { DemoCase } from "@/lib/demo-cases";
 import { DEMO_CASES } from "@/lib/demo-cases";
 import { DecisionBadge } from "@/components/DecisionBadge";
 import { EvaluationTimeline } from "@/components/EvaluationTimeline";
+import type { UserApiKey } from "@/ai-kit/types";
+import { ApiKeyInput } from "@/ai-kit/byok-input";
+import { ProviderBadge } from "@/ai-kit/provider-badge";
+import { buttonVariants } from "@/design-system/components/button";
+import { cn } from "@/design-system/utils";
 
 interface CaseResult {
   case_id: string;
@@ -53,6 +58,7 @@ export default function AppPage() {
   const [country, setCountry] = useState("");
   const [docId, setDocId] = useState("");
   const [context, setContext] = useState("credito");
+  const [userApiKey, setUserApiKey] = useState<UserApiKey | null>(null);
 
   const demoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -70,7 +76,10 @@ export default function AppPage() {
     try {
       const res = await fetch("/api/evaluate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(userApiKey ? { "x-user-api-key": JSON.stringify(userApiKey) } : {}),
+        },
         body: JSON.stringify({ name, country, document_id: docId || undefined, context }),
       });
 
@@ -135,21 +144,21 @@ export default function AppPage() {
   const activeResult = result;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-white/5 bg-slate-900/80 backdrop-blur-md">
+      <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-background/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
               href="/"
-              className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors duration-200"
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors duration-200"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
               </svg>
               Inicio
             </Link>
-            <div className="h-4 w-px bg-white/10" aria-hidden="true" />
+            <div className="h-4 w-px bg-[var(--border)]" aria-hidden="true" />
             <div className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/20">
                 <svg className="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" aria-hidden="true">
@@ -157,8 +166,8 @@ export default function AppPage() {
                 </svg>
               </div>
               <div>
-                <h1 className="text-sm font-bold text-slate-50 leading-tight">Agente de Riesgo</h1>
-                <p className="text-xs text-slate-500">Motor de decisión IA</p>
+                <h1 className="text-sm font-bold text-foreground leading-tight">Agente de Riesgo</h1>
+                <p className="text-xs text-muted-foreground">Motor de decisión IA</p>
               </div>
             </div>
           </div>
@@ -175,8 +184,8 @@ export default function AppPage() {
           <div className="w-full lg:w-[340px] shrink-0 space-y-5">
 
             {/* Casos demo */}
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] bg-card p-5">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Casos de ejemplo · clic para cargar
               </p>
               <div className="space-y-2">
@@ -185,16 +194,16 @@ export default function AppPage() {
                     key={demo.result.case_id}
                     onClick={() => loadDemo(demo)}
                     disabled={loading}
-                    className={`w-full rounded-xl border border-l-4 px-4 py-3 text-left transition-all duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 bg-white/3 hover:bg-white/6 ${
+                    className={`w-full rounded-[var(--radius-md)] border border-l-4 px-4 py-3 text-left transition-all duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 bg-background hover:bg-[var(--gray-50)] ${
                       DECISION_BORDER[demo.result.decision]
                     } ${DEMO_BORDER[demo.result.decision]}`}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-slate-100">
+                        <p className="truncate text-sm font-semibold text-foreground">
                           {demo.input.name}
                         </p>
-                        <p className="mt-0.5 text-xs text-slate-500">
+                        <p className="mt-0.5 text-xs text-muted-foreground">
                           {CONTEXT_LABELS[demo.input.context]} · {demo.input.country}
                         </p>
                       </div>
@@ -207,17 +216,17 @@ export default function AppPage() {
 
             {/* Divider */}
             <div className="flex items-center gap-3">
-              <div className="h-px flex-1 bg-white/8" />
-              <span className="text-xs text-slate-600">O ingresa un caso nuevo</span>
-              <div className="h-px flex-1 bg-white/8" />
+              <div className="h-px flex-1 bg-[var(--border)]" />
+              <span className="text-xs text-muted-foreground">O ingresa un caso nuevo</span>
+              <div className="h-px flex-1 bg-[var(--border)]" />
             </div>
 
             {/* Formulario */}
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
+            <div className="rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] bg-card p-5">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-slate-300 mb-1.5">
-                    Nombre del sujeto <span className="text-red-400">*</span>
+                  <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1.5">
+                    Nombre del sujeto <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="name"
@@ -226,13 +235,13 @@ export default function AppPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Ej. Juan García Pérez"
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30 transition-colors duration-200"
+                    className="w-full rounded-[var(--radius-md)] shadow-[var(--shadow-border-light)] bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/50 transition-colors duration-200"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="country" className="block text-sm font-medium text-slate-300 mb-1.5">
-                    País <span className="text-red-400">*</span>
+                  <label htmlFor="country" className="block text-sm font-medium text-foreground mb-1.5">
+                    País <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="country"
@@ -241,13 +250,13 @@ export default function AppPage() {
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
                     placeholder="Ej. México"
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30 transition-colors duration-200"
+                    className="w-full rounded-[var(--radius-md)] shadow-[var(--shadow-border-light)] bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/50 transition-colors duration-200"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="document" className="block text-sm font-medium text-slate-300 mb-1.5">
-                    Documento <span className="text-slate-500 font-normal">(opcional)</span>
+                  <label htmlFor="document" className="block text-sm font-medium text-foreground mb-1.5">
+                    Documento <span className="text-muted-foreground font-normal">(opcional)</span>
                   </label>
                   <input
                     id="document"
@@ -255,19 +264,19 @@ export default function AppPage() {
                     value={docId}
                     onChange={(e) => setDocId(e.target.value)}
                     placeholder="CURP, DNI, pasaporte…"
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30 transition-colors duration-200"
+                    className="w-full rounded-[var(--radius-md)] shadow-[var(--shadow-border-light)] bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/50 transition-colors duration-200"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="context" className="block text-sm font-medium text-slate-300 mb-1.5">
+                  <label htmlFor="context" className="block text-sm font-medium text-foreground mb-1.5">
                     Contexto
                   </label>
                   <select
                     id="context"
                     value={context}
                     onChange={(e) => setContext(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-slate-800 px-3 py-2.5 text-sm text-slate-100 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30 transition-colors duration-200 cursor-pointer"
+                    className="w-full rounded-[var(--radius-md)] shadow-[var(--shadow-border-light)] bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/50 transition-colors duration-200 cursor-pointer"
                   >
                     <option value="credito">Crédito</option>
                     <option value="contratacion">Contratación</option>
@@ -276,7 +285,7 @@ export default function AppPage() {
                 </div>
 
                 {error && (
-                  <div role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                  <div role="alert" className="rounded-[var(--radius-md)] border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600">
                     {error}
                   </div>
                 )}
@@ -289,7 +298,7 @@ export default function AppPage() {
                   type="submit"
                   disabled={loading}
                   aria-busy={loading}
-                  className="w-full rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-500/20 transition-all duration-200 hover:bg-violet-500 hover:shadow-violet-500/30 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                  className={cn(buttonVariants({ size: "lg" }), "w-full cursor-pointer disabled:cursor-not-allowed")}
                 >
                   {loading ? (
                     <>
@@ -305,6 +314,19 @@ export default function AppPage() {
                 </button>
               </form>
             </div>
+
+            {/* BYOK */}
+            <details className="rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] bg-card overflow-hidden">
+              <summary className="cursor-pointer px-5 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground select-none hover:text-foreground transition-colors list-none flex items-center justify-between">
+                <span>Usar API key propia</span>
+                <svg className="h-3.5 w-3.5 transition-transform duration-200 [[open]_&]:rotate-180" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                </svg>
+              </summary>
+              <div className="px-5 pb-5 pt-1">
+                <ApiKeyInput onKeyChange={setUserApiKey} />
+              </div>
+            </details>
           </div>
 
           {/* Columna derecha — Timeline + Resultado */}
@@ -329,14 +351,14 @@ export default function AppPage() {
 
             {/* Estado vacío */}
             {!isRunning && !activeResult && (
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-12 backdrop-blur-sm text-center">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 border border-white/10">
-                  <svg className="h-7 w-7 text-slate-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
+              <div className="rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] bg-card p-12 text-center">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] bg-card">
+                  <svg className="h-7 w-7 text-muted-foreground" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
                   </svg>
                 </div>
-                <p className="text-sm font-medium text-slate-400">Resultado aparecerá aquí</p>
-                <p className="mt-1 text-xs text-slate-600">
+                <p className="text-sm font-medium text-muted-foreground">Resultado aparecerá aquí</p>
+                <p className="mt-1 text-xs text-muted-foreground">
                   Selecciona un caso demo o completa el formulario.
                 </p>
               </div>
@@ -353,28 +375,32 @@ function CaseDetail({ caseResult }: { caseResult: CaseResult }) {
   const confidencePct = Math.round(d.confidence * 100);
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm space-y-5">
+    <div className="rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] bg-card p-6 space-y-5">
       {/* Cabecera */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-base font-semibold text-slate-100 truncate">{caseResult.subject}</h2>
-          <p className="mt-0.5 text-xs text-slate-500">
+          <h2 className="text-base font-semibold text-foreground truncate">{caseResult.subject}</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
             {CONTEXT_LABELS[caseResult.context] ?? caseResult.context} · {caseResult.country}
           </p>
-          <p className="mt-0.5 font-mono text-xs text-slate-600">{caseResult.case_id}</p>
+          <p className="mt-0.5 font-mono text-xs text-muted-foreground">{caseResult.case_id}</p>
         </div>
         <DecisionBadge decision={d.decision} />
       </div>
 
-      <div className="border-t border-white/8" />
+      {d.provider && d.model && d.latency_ms != null && (
+        <ProviderBadge provider={d.provider} model={d.model} latency_ms={d.latency_ms} />
+      )}
+
+      <div className="border-t border-[var(--border)]" />
 
       {/* Confianza */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">Confianza</p>
-          <span className="text-xs font-semibold text-slate-300">{confidencePct}%</span>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Confianza</p>
+          <span className="text-xs font-semibold text-foreground">{confidencePct}%</span>
         </div>
-        <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+        <div className="h-1.5 w-full rounded-full bg-[var(--gray-100)] overflow-hidden">
           <div
             role="progressbar"
             aria-valuenow={confidencePct}
@@ -389,21 +415,21 @@ function CaseDetail({ caseResult }: { caseResult: CaseResult }) {
         </div>
       </div>
 
-      <div className="border-t border-white/8" />
+      <div className="border-t border-[var(--border)]" />
 
       {/* Razonamiento */}
       <div>
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Razonamiento</p>
-        <p className="text-sm text-slate-300 leading-relaxed">{d.reasoning}</p>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Razonamiento</p>
+        <p className="text-sm text-foreground leading-relaxed">{d.reasoning}</p>
       </div>
 
       {/* Escalation reason */}
       {d.escalation_reason && (
         <>
-          <div className="border-t border-white/8" />
-          <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3">
-            <p className="text-xs font-semibold text-amber-400 uppercase tracking-wide mb-1">Motivo de escalamiento</p>
-            <p className="text-sm text-amber-200/80">{d.escalation_reason}</p>
+          <div className="border-t border-[var(--border)]" />
+          <div className="rounded-[var(--radius-md)] border border-amber-500/20 bg-amber-500/10 px-4 py-3">
+            <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">Motivo de escalamiento</p>
+            <p className="text-sm text-amber-800">{d.escalation_reason}</p>
           </div>
         </>
       )}
@@ -411,12 +437,12 @@ function CaseDetail({ caseResult }: { caseResult: CaseResult }) {
       {/* Red flags */}
       {d.red_flags.length > 0 && (
         <>
-          <div className="border-t border-white/8" />
+          <div className="border-t border-[var(--border)]" />
           <div>
-            <p className="text-xs font-semibold text-red-400 uppercase tracking-wide mb-2">Señales de alerta</p>
+            <p className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-2">Señales de alerta</p>
             <ul className="space-y-1.5">
               {d.red_flags.map((flag, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
+                <li key={i} className="flex items-start gap-2 text-sm text-foreground">
                   <span aria-hidden="true" className="mt-1.5 shrink-0 h-1.5 w-1.5 rounded-full bg-red-500" />
                   {flag}
                 </li>
@@ -429,12 +455,12 @@ function CaseDetail({ caseResult }: { caseResult: CaseResult }) {
       {/* Positive signals */}
       {d.positive_signals.length > 0 && (
         <>
-          <div className="border-t border-white/8" />
+          <div className="border-t border-[var(--border)]" />
           <div>
-            <p className="text-xs font-semibold text-emerald-400 uppercase tracking-wide mb-2">Señales positivas</p>
+            <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-2">Señales positivas</p>
             <ul className="space-y-1.5">
               {d.positive_signals.map((signal, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
+                <li key={i} className="flex items-start gap-2 text-sm text-foreground">
                   <span aria-hidden="true" className="mt-1.5 shrink-0 h-1.5 w-1.5 rounded-full bg-emerald-500" />
                   {signal}
                 </li>
@@ -447,9 +473,9 @@ function CaseDetail({ caseResult }: { caseResult: CaseResult }) {
       {/* Evidence sources */}
       {d.evidence_sources.length > 0 && (
         <>
-          <div className="border-t border-white/8" />
+          <div className="border-t border-[var(--border)]" />
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Fuentes de evidencia</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Fuentes de evidencia</p>
             <ul className="space-y-1">
               {d.evidence_sources.map((url, i) => (
                 <li key={i}>
@@ -457,7 +483,7 @@ function CaseDetail({ caseResult }: { caseResult: CaseResult }) {
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-violet-400 hover:text-violet-300 underline underline-offset-2 break-all transition-colors duration-150"
+                    className="text-xs text-[var(--accent)] hover:text-[var(--accent)]/80 underline underline-offset-2 break-all transition-colors duration-150"
                   >
                     {url}
                     <span className="sr-only"> (abre en nueva pestaña)</span>
