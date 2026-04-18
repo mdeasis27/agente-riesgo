@@ -10,6 +10,8 @@ import { EvaluationTimeline } from "@/components/EvaluationTimeline";
 import type { UserApiKey } from "@/ai-kit/types";
 import { ApiKeyInput } from "@/ai-kit/byok-input";
 import { ProviderBadge } from "@/ai-kit/provider-badge";
+import { buttonVariants } from "@/design-system/components/button";
+import { cn } from "@/design-system/utils";
 
 interface CaseResult {
   case_id: string;
@@ -296,7 +298,7 @@ export default function AppPage() {
                   type="submit"
                   disabled={loading}
                   aria-busy={loading}
-                  className="w-full rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-500/20 transition-all duration-200 hover:bg-violet-500 hover:shadow-violet-500/30 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                  className={cn(buttonVariants({ size: "lg" }), "w-full cursor-pointer disabled:cursor-not-allowed")}
                 >
                   {loading ? (
                     <>
@@ -316,7 +318,7 @@ export default function AppPage() {
             {/* BYOK */}
             <details className="rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] bg-card overflow-hidden">
               <summary className="cursor-pointer px-5 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground select-none hover:text-foreground transition-colors list-none flex items-center justify-between">
-                <span>Usa tu propia API key</span>
+                <span>Usar API key propia</span>
                 <svg className="h-3.5 w-3.5 transition-transform duration-200 [[open]_&]:rotate-180" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                 </svg>
