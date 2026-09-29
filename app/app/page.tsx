@@ -10,7 +10,10 @@ import { EvaluationTimeline } from "@/components/EvaluationTimeline";
 import type { UserApiKey } from "@/ai-kit/types";
 import { ApiKeyInput } from "@/ai-kit/byok-input";
 import { ProviderBadge } from "@/ai-kit/provider-badge";
+import { Alert } from "@/design-system/components/alert";
 import { buttonVariants } from "@/design-system/components/button";
+import { Meter } from "@/design-system/components/meter";
+import { StatusBadge } from "@/design-system/components/status-badge";
 import { cn } from "@/design-system/utils";
 
 interface CaseResult {
@@ -37,15 +40,15 @@ const CONTEXT_LABELS: Record<string, string> = {
 };
 
 const DECISION_BORDER: Record<string, string> = {
-  approve: "border-l-emerald-500",
-  reject: "border-l-red-500",
-  escalate: "border-l-amber-500",
+  approve: "border-l-success",
+  reject: "border-l-danger",
+  escalate: "border-l-warning",
 };
 
 const DEMO_BORDER: Record<string, string> = {
-  approve: "border-emerald-500/30 hover:border-emerald-500/60",
-  reject: "border-red-500/30 hover:border-red-500/60",
-  escalate: "border-amber-500/30 hover:border-amber-500/60",
+  approve: "border-success/30 hover:border-success/60",
+  reject: "border-danger/30 hover:border-danger/60",
+  escalate: "border-warning/30 hover:border-warning/60",
 };
 
 export default function AppPage() {
@@ -160,8 +163,8 @@ export default function AppPage() {
             </Link>
             <div className="h-4 w-px bg-[var(--border)]" aria-hidden="true" />
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/20">
-                <svg className="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" aria-hidden="true">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-warning/10 border border-warning/20">
+                <svg className="h-4 w-4 text-warning" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
                 </svg>
               </div>
@@ -171,10 +174,14 @@ export default function AppPage() {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
-            <span className="text-xs font-medium text-emerald-400">IA activa</span>
-          </div>
+          <StatusBadge
+            tone="success"
+            dot
+            dotClassName="animate-pulse"
+            className="px-3 py-1"
+          >
+            IA activa
+          </StatusBadge>
         </div>
       </header>
 
@@ -226,7 +233,7 @@ export default function AppPage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1.5">
-                    Nombre del sujeto <span className="text-red-500">*</span>
+                    Nombre del sujeto <span className="text-danger">*</span>
                   </label>
                   <input
                     id="name"
@@ -241,7 +248,7 @@ export default function AppPage() {
 
                 <div>
                   <label htmlFor="country" className="block text-sm font-medium text-foreground mb-1.5">
-                    País <span className="text-red-500">*</span>
+                    País <span className="text-danger">*</span>
                   </label>
                   <input
                     id="country"
@@ -284,11 +291,7 @@ export default function AppPage() {
                   </select>
                 </div>
 
-                {error && (
-                  <div role="alert" className="rounded-[var(--radius-md)] border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600">
-                    {error}
-                  </div>
-                )}
+                {error && <Alert tone="danger">{error}</Alert>}
 
                 <div aria-live="polite" aria-atomic="true" className="sr-only">
                   {loading ? "Evaluando caso, por favor espera." : ""}
@@ -400,19 +403,18 @@ function CaseDetail({ caseResult }: { caseResult: CaseResult }) {
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Confianza</p>
           <span className="text-xs font-semibold text-foreground">{confidencePct}%</span>
         </div>
-        <div className="h-1.5 w-full rounded-full bg-[var(--gray-100)] overflow-hidden">
-          <div
-            role="progressbar"
-            aria-valuenow={confidencePct}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label={`Confianza: ${confidencePct}%`}
-            className={`h-full rounded-full transition-all duration-700 ${
-              d.decision === "approve" ? "bg-emerald-500" : d.decision === "reject" ? "bg-red-500" : "bg-amber-500"
-            }`}
-            style={{ width: `${confidencePct}%` }}
-          />
-        </div>
+        <Meter
+          value={confidencePct}
+          tone={
+            d.decision === "approve"
+              ? "success"
+              : d.decision === "reject"
+                ? "danger"
+                : "warning"
+          }
+          aria-label={`Confianza: ${confidencePct}%`}
+          className="h-1.5"
+        />
       </div>
 
       <div className="border-t border-[var(--border)]" />
@@ -427,10 +429,9 @@ function CaseDetail({ caseResult }: { caseResult: CaseResult }) {
       {d.escalation_reason && (
         <>
           <div className="border-t border-[var(--border)]" />
-          <div className="rounded-[var(--radius-md)] border border-amber-500/20 bg-amber-500/10 px-4 py-3">
-            <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">Motivo de escalamiento</p>
-            <p className="text-sm text-amber-800">{d.escalation_reason}</p>
-          </div>
+          <Alert tone="warning" title="Motivo de escalamiento">
+            <p className="text-sm text-foreground">{d.escalation_reason}</p>
+          </Alert>
         </>
       )}
 
@@ -438,17 +439,7 @@ function CaseDetail({ caseResult }: { caseResult: CaseResult }) {
       {d.red_flags.length > 0 && (
         <>
           <div className="border-t border-[var(--border)]" />
-          <div>
-            <p className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-2">Señales de alerta</p>
-            <ul className="space-y-1.5">
-              {d.red_flags.map((flag, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                  <span aria-hidden="true" className="mt-1.5 shrink-0 h-1.5 w-1.5 rounded-full bg-red-500" />
-                  {flag}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <Alert tone="danger" title="Señales de alerta" items={d.red_flags} />
         </>
       )}
 
@@ -456,17 +447,7 @@ function CaseDetail({ caseResult }: { caseResult: CaseResult }) {
       {d.positive_signals.length > 0 && (
         <>
           <div className="border-t border-[var(--border)]" />
-          <div>
-            <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-2">Señales positivas</p>
-            <ul className="space-y-1.5">
-              {d.positive_signals.map((signal, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                  <span aria-hidden="true" className="mt-1.5 shrink-0 h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  {signal}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <Alert tone="success" title="Señales positivas" items={d.positive_signals} />
         </>
       )}
 
