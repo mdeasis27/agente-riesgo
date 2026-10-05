@@ -1,0 +1,51 @@
+{
+  "repository": "agente-riesgo",
+  "scope": "Real React component with controlled locale; Next routes not tested.",
+  "checks": [
+    {
+      "locale": "en",
+      "scenarios": [
+        {
+          "preset": "Clear case\nAll three gates permit progress.",
+          "outcome": "Proceed\n\nAll three gates satisfy local policy, so the case can proceed."
+        },
+        {
+          "preset": "Blocking signal\nScreening sends the case to stop.",
+          "outcome": "Stop\n\nThe screening signal blocks progress and requires a human decision."
+        }
+      ],
+      "mobileNoOverflow": true,
+      "reducedMotion": true,
+      "keyboard": true,
+      "noRequests": true,
+      "sceneChangesWithScenario": true,
+      "editingClearsPresetAndTrace": true,
+      "resetRestoresFirstPreset": true,
+      "cancelControlPresent": true,
+      "presetRestoresAllInputs": true
+    },
+    {
+      "locale": "es",
+      "scenarios": [
+        {
+          "preset": "Caso limpio\nLas tres compuertas permiten el avance.",
+          "outcome": "Continuar\n\nLas tres compuertas cumplen la política local y el caso puede continuar."
+        },
+        {
+          "preset": "Señal bloqueante\nEl screening envía el caso a detener.",
+          "outcome": "Detener\n\nLa señal de screening bloquea el avance y requiere una decisión humana."
+        }
+      ],
+      "mobileNoOverflow": true,
+      "reducedMotion": true,
+      "keyboard": true,
+      "noRequests": true,
+      "sceneChangesWithScenario": true,
+      "editingClearsPresetAndTrace": true,
+      "resetRestoresFirstPreset": true,
+      "cancelControlPresent": true,
+      "presetRestoresAllInputs": true
+    }
+  ],
+  "errors": []
+}

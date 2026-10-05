@@ -1,4 +1,4 @@
-# Diseño: Integración Exa con queries especializadas por contexto
+# Diseño: Integración Web search API con queries especializadas por contexto
 
 **Fecha:** 2026-04-14  
 **Estado:** Aprobado  
@@ -8,11 +8,11 @@
 
 ## Problema
 
-El cliente Exa actual (`lib/exa.ts`) tiene tres deficiencias:
+El cliente Web search API actual (`lib/exa.ts`) tiene tres deficiencias:
 
 1. Usa `useAutoprompt: true` (parámetro deprecado) y `type: "neural"` (reemplazado por `"auto"`).
 2. Usa `fetch` manual en lugar del SDK oficial `exa-js`.
-3. Lanza las mismas 3 queries genéricas sin importar el contexto (crédito, contratación, onboarding), desaprovechando las categorías semánticas de Exa.
+3. Lanza las mismas 3 queries genéricas sin importar el contexto (crédito, contratación, onboarding), desaprovechando las categorías semánticas de Web search API.
 
 ---
 
@@ -81,7 +81,7 @@ Objetivo: detectar sanciones, PEP y riesgo de identidad.
 
 - Las queries corren en paralelo con `Promise.allSettled`.
 - Si una query individual falla (timeout, 429, error de red), se descarta silenciosamente y se continúa con las demás.
-- Si todas fallan, `searchSubject` retorna `[]` — el agente razona solo con datos Truora.
+- Si todas fallan, `searchSubject` retorna `[]` — el agente razona solo con datos Identity verification API.
 - Si `EXA_API_KEY` no está configurada, retorna resultado mock para modo demo (comportamiento actual preservado).
 
 ---
@@ -108,6 +108,6 @@ Después de aplanar todos los resultados:
 
 ## Fuera de alcance
 
-- Convertir Exa en herramienta del agente (tool use / function calling).
+- Convertir Web search API en herramienta del agente (tool use / function calling).
 - Cambiar el modelo LLM o el prompt en `agent.ts`.
-- Persistencia de resultados Exa en base de datos.
+- Persistencia de resultados Web search API en base de datos.

@@ -31,7 +31,7 @@ La landing vive en `app/page.tsx` (actual). La app se mueve a `app/app/page.tsx`
 - **Título:** "Decisiones de riesgo en segundos, no días"
 - **Subtítulo:** descripción del agente en 2 líneas
 - **CTAs:** "Ver demo en vivo →" (va a `/app`) + "Ver en GitHub" (link al repo)
-- **Tech stack badges:** Next.js 16 · OpenRouter · Exa.ai · Truora · TypeScript · Tailwind v4
+- **Tech stack badges:** Next.js 16 · LLM API · API de búsqueda web · API de verificación de identidad · TypeScript · Tailwind v4
 - **Fondo:** gradiente radial violeta sutil desde arriba (`radial-gradient` en el hero)
 
 ### Cómo funciona (3 pasos)
@@ -40,9 +40,9 @@ Grid de 3 columnas con conectores entre pasos:
 
 | Paso | Título | Fuente |
 |------|--------|--------|
-| 1 | Recopila evidencia | Exa.ai · búsqueda semántica |
-| 2 | Verifica identidad | Truora · background check |
-| 3 | Razona y decide | OpenRouter · LLM |
+| 1 | Recopila evidencia | API de búsqueda web · búsqueda semántica |
+| 2 | Verifica identidad | API de verificación de identidad · background check |
+| 3 | Razona y decide | LLM API · LLM |
 
 Cada paso tiene: número con color propio (violeta / amber / verde), título, descripción de 2 líneas y label de la tecnología usada.
 
@@ -86,8 +86,8 @@ Reemplaza el spinner durante la evaluación. Muestra 4 pasos en secuencia:
 
 | Paso | Estado | Resultado visible |
 |------|--------|-------------------|
-| Verificación de identidad (Truora) | ✓ done | "Identidad confirmada · Sin sanciones · Sin PEP" |
-| Búsqueda de evidencia (Exa) | ✓ done | "N fuentes encontradas · M relevantes tras deduplicar" |
+| Verificación de identidad (API de verificación de identidad) | ✓ done | "Identidad confirmada · Sin sanciones · Sin PEP" |
+| Búsqueda de evidencia (API de búsqueda web) | ✓ done | "N fuentes encontradas · M relevantes tras deduplicar" |
 | Razonando decisión (LLM) | ⟳ activo | spinner animado con glow |
 | Resultado final | ○ pendiente | gris hasta que completa |
 

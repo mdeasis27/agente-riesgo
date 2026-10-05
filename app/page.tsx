@@ -5,9 +5,9 @@ import { cn } from "@/design-system/utils";
 
 const STACK = [
   "Next.js 16",
-  "OpenRouter",
-  "Exa.ai",
-  "Truora",
+  "LLM API",
+  "Web search API",
+  "Identity verification API",
   "TypeScript",
   "Tailwind v4",
 ];

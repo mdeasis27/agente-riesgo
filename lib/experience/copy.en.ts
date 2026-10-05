@@ -1,0 +1,1 @@
+export const copy = { title: "Risk policy simulator", briefing: "Change the evidence and see how an operations policy routes a fictional case. This is a local policy simulation, not a credit prediction.", run: "Run scenario", verification: "Verification", coverage: "Evidence coverage", threshold: "Review threshold", sanctioned: "Screening signal" };

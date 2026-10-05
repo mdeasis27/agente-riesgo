@@ -1,148 +1,95 @@
-# Agente de Riesgo
+# Risk triage
 
-Motor de decisión con IA para evaluar solicitudes de crédito, contratación y onboarding. El agente recopila evidencia web, verifica identidad y razona sobre el caso para tomar una decisión automatizada — o escalar a revisión humana cuando la confianza es baja.
+[Español](README.es.md) · [Try the demo](https://agente-riesgo-manueldeasis27-2515s-projects.vercel.app/en/app) · [Case study](https://manueldeasis.com/en/projects/agente-riesgo) · [Source](https://github.com/mdeasis27/agente-riesgo)
 
----
+![Actual interactive local interface](docs/images/cover.png)
 
-## Cómo funciona
+Change verification flags, evidence coverage, and the review threshold to inspect a policy decision.
 
-```
-Usuario
-  │
-  ▼
-POST /api/evaluate
-  │
-  ├── Truora API ──────────────── Verificación de identidad
-  │   └── ¿Sanciones? ¿PEP? ¿Antecedentes judiciales?
-  │
-  ├── Exa.ai ──────────────────── Búsqueda semántica web
-  │   └── 3 queries por contexto (crédito / contratación / onboarding)
-  │       deduplicadas por URL, ordenadas por score
-  │
-  └── LLM (OpenRouter) ─────────── Razonamiento final
-      └── Analiza Truora + Exa → JSON estructurado
-          { decision, confidence, reasoning, red_flags, positive_signals }
-              │
-              ├── confidence ≥ 0.65 → approve / reject
-              └── confidence < 0.65 → escalate (revisión humana)
-```
+## Two situations to compare
 
-El agente usa un **sistema de fallback dinámico** para los LLMs: consulta la lista de modelos gratuitos disponibles en OpenRouter en tiempo real, los ordena por preferencia y rota automáticamente si uno está rate-limitado o no disponible.
+**Clear case:** confirmed verification, no sanctions, 85 coverage The policy proceeds.
 
----
+![Clear case](docs/images/scenario-a.png)
 
-## Tech stack
+**Blocking signal:** confirmed verification, sanctions enabled, 85 coverage The policy stops and prioritizes the case.
 
-| Capa | Tecnología |
-|------|------------|
-| Framework | Next.js 15 (App Router) |
-| Lenguaje | TypeScript |
-| Estilos | Tailwind CSS v4 |
-| LLM routing | OpenRouter (modelos gratuitos con fallback automático) |
-| Búsqueda web | Exa.ai — búsqueda semántica con `exa-js` SDK |
-| Verificación de identidad | Truora API |
-| AI SDK | Vercel AI SDK (`generateText`) |
-| Deploy | Vercel |
+![Blocking signal](docs/images/scenario-b.png)
 
----
+## Business use case
 
-## Contextos de evaluación
+A blocking signal can enter an operational queue.
 
-| Contexto | Qué evalúa | Señales clave |
-|----------|-----------|---------------|
-| **Crédito** | Riesgo crediticio y fraude financiero | Deudas, embargos, insolvencia |
-| **Contratación** | Trayectoria laboral y litigios | Demandas laborales, historial profesional |
-| **Onboarding KYC/AML** | Identidad y cumplimiento regulatorio | Sanciones OFAC, PEP, listas negras |
+**Who uses it:** Risk owner.
 
----
+**The decision:** Proceed, review, or stop.
 
-## Correr localmente
+Verify, screen, then apply policy.
 
-### Requisitos
+### Try the decision
 
-- Node.js 20+
-- Una cuenta en [OpenRouter](https://openrouter.ai) (gratis, sin tarjeta de crédito)
+**Clear case:** confirmed verification, no sanctions, 85 coverage The policy proceeds.
 
-### Setup
+**Blocking signal:** confirmed verification, sanctions enabled, 85 coverage The policy stops and prioritizes the case.
 
-```bash
-git clone https://github.com/mdeasis27/agente-riesgo
-cd agente-riesgo
-npm install
-cp .env.example .env.local
+Choose a scenario, edit its controls and run the local computation. Step through the visual process or reveal all steps. Reset before comparing the second scenario.
+
+## How to try it
+
+Open `/en/app` (English, default) or `/es/app` (Spanish). Change the scenario inputs and run the computation. Inspect the resulting decision, evidence and computed trace. Playback reveals completed local steps; it does not measure a live model. Reset starts a new local scenario. Changing language resets the scenario.
+
+The primary demo needs no account, API key or database. Public links refer to the existing deployment; local redesign changes are pending publication.
+
+<!-- recruiter-mission:start -->
+### Your interactive mission
+
+Load partial evidence, inspect the signals, optionally predict proceed/review/stop, then execute and reveal the terminal comparison.
+
+Compare review thresholds 20 and 50 with identical verification, screening and coverage. Score = 55 for missing verification + (100 − coverage) / 2. With confirmed verification and 40% coverage, score 30 means review at 20 and proceed at 50. A sanctions signal stops both policies.
+
+**Why this approach:** Keeping evidence separate from policy makes the routing decision inspectable. This deterministic simulation does not predict creditworthiness or identify an optimal review threshold.
+
+**Before production:** Validate labeled cases, false positives/negatives, fairness, privacy, human review and applicable rules with specialists.
+
+Editing inputs, choosing a preset or resetting clears the prediction and obsolete results. Comparisons appear only at completed playback; the primary demos need no account or key.
+
+The mission pilot updates this implementation. Existing screenshots and browser reports document the previous stage; fresh browser interaction checks and captures are pending because the current environment blocked them.
+<!-- recruiter-mission:end -->
+
+## Local setup and verification
+
+Requires Node.js 22 and pnpm 10.
+
+```sh
+pnpm install --frozen-lockfile
+pnpm dev
+pnpm test
+node node_modules/typescript/bin/tsc --noEmit --incremental false
+pnpm lint
+pnpm build
 ```
 
-Edita `.env.local` y agrega tu `OPENROUTER_API_KEY`. Las demás claves son opcionales — el agente funciona en modo mock sin ellas.
+Open `http://localhost:3000/en/app`. Recorded validation covers tests, lint, TypeScript and production builds. See [command results](docs/quality/decision-lab-verification.json) and [browser component checks](docs/quality/decision-lab-browser.json). The new browser checks exercise real React components and production CSS with controlled locale navigation; they do not certify Next routes or public deployment.
 
-```bash
-npm run dev
-```
+## Architecture
 
-Abre [http://localhost:3000](http://localhost:3000).
+- `app/[lang]/`: localized browser experience.
+- `lib/experience/`: typed local adapter, validation and run traces.
+- `design-system/`: shared visual tokens, locale controls and execution/replay presentation.
+- `app/api/`: optional server integrations; the primary demo does not require them.
 
-### Sin API keys
+Technology: Next.js 16, TypeScript, AI SDK, REST APIs, LLM API, Tailwind CSS v4.
 
-Los tres casos demo (**María**, **Carlos**, **Ana**) funcionan completamente sin API keys — usan respuestas pre-computadas. El formulario de evaluación libre requiere al menos `OPENROUTER_API_KEY`.
+## Evidence and limitations
 
----
+Three evidence gates reveal the computed route.
 
-## Variables de entorno
+Evidence lanes and a review branch; a policy simulation, not a credit prediction.
 
-| Variable | Requerida | Descripción |
-|----------|-----------|-------------|
-| `OPENROUTER_API_KEY` | Para formulario | LLM routing — modelos gratuitos disponibles |
-| `EXA_API_KEY` | Opcional | Búsqueda semántica web. Sin ella, el agente opera sin evidencia web |
-| `TRUORA_API_KEY` | Opcional | Verificación de identidad real. Sin ella, usa mock |
-| `TRUORA_MOCK` | — | `true` activa datos simulados (útil en desarrollo) |
-| `INTERNAL_API_KEY` | Opcional | Protege `/api/evaluate` en producción |
+Makes the policy route inspectable.
 
-Ver `.env.example` para la configuración completa.
+**Limits:** Local simulation; no external screening is performed. These portfolio prototypes do not claim measured production impact.
 
----
+Inputs use fictional or anonymized examples. Optional live integrations require their own credentials and operational setup. Secrets belong in the configured secret manager, never in local secret files or Git. Use the existing `infisical run -- <command>` workflow when live integration is needed. This repository does not publish or deploy automatically as part of the local demo.
 
-## Arquitectura de archivos
-
-```
-app/
-├── page.tsx              # Landing page
-├── app/
-│   └── page.tsx          # App de evaluación (demo cases + formulario)
-└── api/
-    ├── evaluate/
-    │   └── route.ts      # POST /api/evaluate — orquesta Truora + Exa + LLM
-    └── escalate/
-        └── route.ts      # POST /api/escalate — notificación de escalamiento
-
-lib/
-├── agent.ts              # Motor del agente — LLM + fallback dinámico de modelos
-├── exa.ts                # Cliente Exa.ai con estrategias de búsqueda por contexto
-├── truora.ts             # Cliente Truora con modo mock para desarrollo
-├── confidence.ts         # Algoritmo de confianza y umbral de escalamiento
-└── demo-cases.ts         # Casos demo pre-computados (sin API)
-
-components/
-├── EvaluationTimeline.tsx # Timeline animado del proceso de evaluación
-└── DecisionBadge.tsx      # Badge de decisión (approve / reject / escalate)
-```
-
----
-
-## Decisiones de diseño
-
-**¿Por qué fallback dinámico de modelos?**
-Los modelos gratuitos de OpenRouter tienen rate limits compartidos y cambian con frecuencia. En lugar de hardcodear una lista que se vuelve obsoleta, el agente consulta `/api/v1/models` en tiempo real, filtra los disponibles y los ordena por preferencia. El resultado se cachea 10 minutos para no agregar latencia.
-
-**¿Por qué casos demo pre-computados?**
-Permiten que cualquier persona explore el agente sin configurar API keys — ideal para portafolio y demos en entrevistas. El timeline del frontend simula el proceso mientras el backend trabaja en paralelo.
-
-**¿Por qué escalar en lugar de forzar una decisión?**
-Un sistema de riesgo real no debe tomar decisiones de alto impacto con poca confianza. El umbral del 65% fuerza revisión humana cuando hay señales ambiguas o conflictivas — comportamiento correcto en contextos financieros y de compliance.
-
-**Truora en modo mock**
-La integración con Truora está completa pero requiere una API key de pago. En modo demo/desarrollo (`TRUORA_MOCK=true`), se usa un mock que retorna perfil limpio para que la decisión recaiga en la evidencia web de Exa.ai y el razonamiento del LLM.
-
----
-
-## Autor
-
-Manuel de Asis · [LinkedIn](https://linkedin.com/in/mdeasis27) · [GitHub](https://github.com/mdeasis27)
+![Actual English demo capture](docs/images/demo.png)

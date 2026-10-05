@@ -22,14 +22,14 @@ interface CaseResult {
   country: string;
   context: string;
   decision: AgentDecision;
-  /** Datos de Truora para el timeline */
+  /** Datos de Identity verification API para el timeline */
   truora?: {
     identity_confirmed: boolean;
     sanctions_hit: boolean;
     pep_hit: boolean;
     judicial_records: boolean;
   };
-  /** Datos de Exa para el timeline */
+  /** Datos de Web search API para el timeline */
   exa?: { sources_found: number; sources_relevant: number };
 }
 

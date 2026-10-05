@@ -1,4 +1,4 @@
-// Cliente Truora — validación de identidad y antecedentes para decisiones de riesgo
+// Identity-verification client for risk decisions.
 
 const TRUORA_BASE = "https://api.truora.com";
 
@@ -41,7 +41,7 @@ export async function runVerification(params: {
     body: JSON.stringify({ ...params, type: "background_check" }),
   });
 
-  if (!res.ok) throw new Error(`Truora error: ${res.status}`);
+  if (!res.ok) throw new Error(`Identity verification error: ${res.status}`);
   const data = await res.json();
 
   return {
