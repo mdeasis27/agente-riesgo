@@ -59,9 +59,9 @@ function Passenger({ n, from, scan, at, decision, revealed, delay }: { n: number
   return <g data-crossing={from ? "" : undefined} style={{ ...style, transform: `translate(${at.x}px, ${at.y}px)` }} className={from ? "" : "transition-transform duration-500 ease-in-out motion-reduce:transition-none"}>
     <circle cy={-26} r={6} className="fill-muted-foreground" />
     <rect x={-9} y={-18} width={18} height={22} rx={5} style={{ transitionDelay: `${from ? delay + CROSS_MS / 2 : 0}ms` }} className={`transition-colors duration-200 motion-reduce:transition-none ${revealed ? TONE[decision].fill : "fill-muted-foreground/60"}`} />
-    <rect x={9} y={-5} width={9} height={9} rx={2} className="fill-amber-700" />
-    {revealed && decision === "review" ? <path d="M9 -5 l3 -8 h9 l-3 8" className="fill-amber-500" /> : null}
-    <text y={-3} textAnchor="middle" fontSize={10} className="fill-white font-mono">{n}</text>
+    <rect x={9} y={-5} width={9} height={9} rx={2} className="fill-warning/70" />
+    {revealed && decision === "review" ? <path d="M9 -5 l3 -8 h9 l-3 8" className="fill-warning" /> : null}
+    <text y={-3} textAnchor="middle" fontSize={10} className="fill-background font-mono">{n}</text>
     {revealed && decision === "stop" ? <path d="M-8 -22 L8 -2 M8 -22 L-8 -2" strokeWidth={3} strokeLinecap="round" className="stroke-foreground" /> : null}
   </g>;
 }
