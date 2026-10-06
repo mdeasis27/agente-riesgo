@@ -2,34 +2,26 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { runMission } from "./mission";
 
-const input = { verification: "confirmed" as const, sanctions: false, evidenceCoverage: 40, reviewThreshold: 20 };
+const run = (reviewThreshold: number) => runMission({ reviewThreshold }, new AbortController().signal, () => {});
 
-test("only the threshold changes a partial-evidence case from review to proceed", async () => {
-  const run = await runMission(input, new AbortController().signal, () => {});
-  assert.equal(run.result.decision, "review");
-  assert.equal(run.result.comparison.cautious.decision, "review");
-  assert.equal(run.result.comparison.permissive.decision, "proceed");
-  assert.deepEqual(run.result.comparison.cautious.evidence, run.result.comparison.permissive.evidence);
-  assert.deepEqual(run.input, input);
+test("runs the 12 cases and reveals them three at a time", async () => {
+  const r = await run(30);
+  assert.equal(r.result.items.length, 12);
+  assert.equal(r.trace.length, 4);
+  assert.deepEqual(r.trace[0].evidenceIds, ["case-1", "case-2", "case-3"]);
+  assert.deepEqual(r.result.counts, { proceed: 7, review: 4, stop: 1 });
 });
 
-test("neither threshold bypasses a blocking screening signal", async () => {
-  const run = await runMission({ ...input, sanctions: true }, new AbortController().signal, () => {});
-  assert.equal(run.result.comparison.cautious.decision, "stop");
-  assert.equal(run.result.comparison.permissive.decision, "stop");
+test("compares against the same cases without the sanctions check", async () => {
+  assert.deepEqual((await run(30)).result.comparison, { withCheck: 0, withoutCheck: 1 });
+  assert.deepEqual((await run(0)).result.comparison, { withCheck: 0, withoutCheck: 0 });
 });
 
-test("cancellation during the selected trace prevents a comparison", async () => {
-  const controller = new AbortController();
-  await assert.rejects(() => runMission(input, controller.signal, () => controller.abort()), { name: "AbortError" });
+test("rejects a threshold outside 0..100", async () => {
+  await assert.rejects(run(120));
 });
 
-test("cancelling at screening emits no policy decision afterward", async () => {
-  const controller = new AbortController();
-  const emitted: string[] = [];
-  await assert.rejects(() => runMission(input, controller.signal, event => {
-    emitted.push(event.id);
-    if (event.id === "screening") controller.abort();
-  }), { name: "AbortError" });
-  assert.deepEqual(emitted, ["verification", "screening"]);
+test("stops when aborted", async () => {
+  const c = new AbortController(); c.abort();
+  await assert.rejects(runMission({ reviewThreshold: 30 }, c.signal, () => {}));
 });

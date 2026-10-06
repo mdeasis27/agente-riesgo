@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test": "tsx --test lib/experience/adapter.test.ts lib/experience/mission.test.ts lib/experience/story.test.ts"
+    "test": "tsx --test lib/experience/*.test.ts",
+    "brand:sync": "node ../portafolio-mdea/scripts/brand-sync.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.52",
