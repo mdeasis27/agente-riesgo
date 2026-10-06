@@ -1,7 +1,5 @@
 import type { Heading } from "@/design-system/demo/project-story";
 
-type NodeCopy = { name: string; sub: string; analogy: string };
-
 export interface RiesgoStory {
   name: string;
   oneLiner: string;
@@ -13,7 +11,7 @@ export interface RiesgoStory {
   fit: { heading: Heading; worthLabel: string; worth: string; notLabel: string; not: string };
   proves: { heading: Heading; text: string };
   engineers: { summary: string; points: string[]; repoLabel: string };
-  scene: { title: string; caption: string; statusLabels: { active: string; success: string }; tapeLabel: string; nodes: { cases: NodeCopy; evidence: NodeCopy; lists: NodeCopy; decision: NodeCopy }; tape: { served: string; rerouted: string; lost: string }; throughOf: (n: number) => string };
+  scene: { title: string; caption: string; tapeLabel: string; airport: { queue: string; scanner: string; threshold: (t: number) => string; list: string; gate: string; bag: string; noBoard: string }; summary: (total: number, through: number, review: number, stopped: number) => string; tape: { served: string; rerouted: string; lost: string }; throughOf: (n: number) => string };
 }
 
 export const STORY: Record<"en" | "es", RiesgoStory> = {
@@ -86,15 +84,10 @@ export const STORY: Record<"en" | "es", RiesgoStory> = {
     },
     scene: {
       title: "Where each case ended up",
-      caption: "Watch the cases arrive three at a time and see which ones go to a person.",
-      statusLabels: { active: "tuned by you", success: "stopped a listed case" },
+      caption: "Watch the cases cross the scanner three at a time. Green reach the gate, blue get their bag opened and the red one with an × is stopped by the list.",
       tapeLabel: "Twelve cases, in the order they arrived",
-      nodes: {
-        cases: { name: "Credit cases", sub: "12 applications", analogy: "the passengers" },
-        evidence: { name: "Evidence review", sub: "review threshold", analogy: "the scanner" },
-        lists: { name: "Sanctions check", sub: "lists", analogy: "the no-fly list" },
-        decision: { name: "Decision", sub: "through, review or stop", analogy: "the gate" },
-      },
+      airport: { queue: "Case line", scanner: "Scanner", threshold: (t) => `threshold ${t}`, list: "No-fly list", gate: "Boarding gate", bag: "Bag opened by a person", noBoard: "Does not board" },
+      summary: (total, through, review, stopped) => `Airport security: ${total} credit cases cross the scanner one by one. ${through} ${through === 1 ? "reaches" : "reach"} the gate, ${review} ${review === 1 ? "gets its" : "get their"} bag opened by a person and ${stopped} ${stopped === 1 ? "is" : "are"} on the list and ${stopped === 1 ? "does" : "do"} not board.`,
       tape: { served: "went straight through", rerouted: "sent to a person", lost: "stopped at the check" },
       throughOf: (n) => (n === 1 ? "1 of 12 went straight through" : `${n} of 12 went straight through`),
     },
@@ -168,15 +161,10 @@ export const STORY: Record<"en" | "es", RiesgoStory> = {
     },
     scene: {
       title: "Dónde terminó cada caso",
-      caption: "Mira cómo llegan los casos de tres en tres y cuáles van a una persona.",
-      statusLabels: { active: "ajustado por ti", success: "detuvo un caso en lista" },
+      caption: "Mira cómo cruzan el escáner de tres en tres. Los verdes llegan a la puerta, a los azules les abren la maleta y el rojo con una × lo detiene la lista.",
       tapeLabel: "Doce casos, en el orden en que llegaron",
-      nodes: {
-        cases: { name: "Casos", sub: "12 solicitudes", analogy: "los pasajeros" },
-        evidence: { name: "Evidencia", sub: "umbral de revisión", analogy: "el escáner" },
-        lists: { name: "Listas", sub: "sanciones", analogy: "la lista de no abordar" },
-        decision: { name: "Decisión", sub: "pasa, revisa o alto", analogy: "la puerta" },
-      },
+      airport: { queue: "Fila de casos", scanner: "Escáner", threshold: (t) => `umbral ${t}`, list: "Lista de no abordar", gate: "Puerta de embarque", bag: "Le abren la maleta (una persona)", noBoard: "No aborda" },
+      summary: (total, through, review, stopped) => `Control de aeropuerto: ${total} casos de crédito cruzan el escáner uno por uno. ${through} ${through === 1 ? "llega" : "llegan"} a la puerta, a ${review} ${review === 1 ? "le abren" : "les abren"} la maleta y ${stopped} ${stopped === 1 ? "aparece" : "aparecen"} en la lista y no ${stopped === 1 ? "aborda" : "abordan"}.`,
       tape: { served: "pasó directo", rerouted: "fue a una persona", lost: "se detuvo en el chequeo" },
       throughOf: (n) => (n === 1 ? "Pasó directo 1 de 12" : `Pasaron directo ${n} de 12`),
     },

@@ -27,7 +27,7 @@ export function Experience({ lang: locale }: { lang: "en" | "es" }) {
   const played = demo.trace.length === 0 || playedTrace === demo.trace;
   const clear = () => { setPrediction(null); demo.reset(); };
   const reset = () => { setThreshold(DEFAULT_THRESHOLD); clear(); };
-  const scene = (frame: typeof COMPLETE_FRAME) => result ? <RiesgoStoryScene frame={frame} result={result} locale={locale} /> : null;
+  const scene = (frame: typeof COMPLETE_FRAME) => result ? <RiesgoStoryScene frame={frame} result={result} threshold={run?.input.reviewThreshold ?? threshold} locale={locale} /> : null;
   const through = result?.counts.proceed ?? 0;
 
   return <main className="mx-auto max-w-5xl px-5 py-8 text-foreground sm:py-12">
