@@ -34,3 +34,8 @@ test("straight-through count agrees in number", () => {
   assert.equal(STORY.es.scene.throughOf(1), "Pasó directo 1 de 12");
   assert.equal(STORY.es.scene.throughOf(7), "Pasaron directo 7 de 12");
 });
+
+test("the airport summary uses the real counts and agrees in number", () => {
+  assert.equal(STORY.en.scene.summary(12, 7, 4, 1), "Airport security: 12 credit cases cross the scanner one by one. 7 reach the gate, 4 get their bag opened by a person and 1 is on the list and does not board.");
+  assert.equal(STORY.es.scene.summary(12, 11, 1, 0), "Control de aeropuerto: 12 casos de crédito cruzan el escáner uno por uno. 11 llegan a la puerta, a 1 le abren la maleta y 0 aparecen en la lista y no abordan.");
+});

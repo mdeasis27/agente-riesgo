@@ -15,3 +15,11 @@ export function revealedCases(frame: { visible: number; total: number; complete:
 }
 
 export const COMPLETE_FRAME: PlaybackFrame<TraceEvent> = { visible: 0, total: 0, event: undefined, complete: true };
+
+export type Placement = { at: "queue" | ExperienceResult["decision"]; slot: number };
+
+/** Where each case stands: revealed cases sit at their decision in arrival order; the rest wait in line. */
+export function riesgoPlacements(items: readonly { decision: ExperienceResult["decision"] }[], revealed: number): Placement[] {
+  const used = { proceed: 0, review: 0, stop: 0 };
+  return items.map((c, i) => (i < revealed ? { at: c.decision, slot: used[c.decision]++ } : { at: "queue", slot: i - revealed }));
+}

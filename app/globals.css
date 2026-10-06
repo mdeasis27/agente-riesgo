@@ -84,3 +84,13 @@
     font-weight: 600;
   }
 }
+
+/* Risk triage scene: a passenger walks from the line through the scanner to its destination. */
+@keyframes riesgo-cross {
+  0% { transform: translate(var(--fx), var(--fy)); }
+  45%, 55% { transform: translate(var(--sx), var(--sy)); }
+  100% { transform: translate(var(--tx), var(--ty)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-crossing] { animation: none !important; }
+}
