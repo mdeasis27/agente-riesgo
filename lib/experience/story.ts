@@ -77,7 +77,7 @@ export const STORY: Record<"en" | "es", RiesgoStory> = {
     engineers: {
       summary: "For engineers",
       points: [
-        "The 12 cases are a fixed fictional batch. Each one goes through the same policy function the API uses.",
+        "The 12 cases are a fixed fictional batch. Each one goes through the same policy function the demo adapter uses.",
         "Review score = 55 if the identity check is missing, plus half of the missing evidence coverage. A case goes to review when the score reaches the threshold. A sanctions hit stops the case before the score is computed.",
         "Tests pin the counts at thresholds 25 and 30, and sweep the slider to prove the bet can go either way.",
         "Stack: Next.js 16, TypeScript, node:test.",
@@ -159,7 +159,7 @@ export const STORY: Record<"en" | "es", RiesgoStory> = {
     engineers: {
       summary: "Para ingenieros",
       points: [
-        "Los 12 casos son un lote ficticio fijo. Cada uno pasa por la misma función de política que usa la API.",
+        "Los 12 casos son un lote ficticio fijo. Cada uno pasa por la misma función de política que usa el adaptador de la demo.",
         "Puntaje de revisión = 55 si falta la verificación de identidad, más la mitad de la cobertura de evidencia que falta. Un caso va a revisión cuando el puntaje llega al umbral. Una coincidencia en sanciones detiene el caso antes de calcular el puntaje.",
         "Los tests fijan los conteos con umbral 25 y 30, y recorren el slider para comprobar que la apuesta puede salir para los dos lados.",
         "Stack: Next.js 16, TypeScript, node:test.",

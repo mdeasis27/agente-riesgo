@@ -19,4 +19,5 @@ test("sweep: both bet answers are reachable on the slider, and the default says 
   const answers = new Set<boolean>();
   for (let t = 0; t <= 100; t += 5) answers.add(runBatch(t).counts.proceed > CASES.length / 2);
   assert.deepEqual([...answers].sort(), [false, true]);
+  assert.equal(runBatch(30).counts.proceed > CASES.length / 2, true);
 });
