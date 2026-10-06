@@ -18,14 +18,14 @@ export interface RiesgoStory {
 
 export const STORY: Record<"en" | "es", RiesgoStory> = {
   en: {
-    name: "Risk Agent",
+    name: "Risk triage",
     oneLiner: "Decides which credit cases go straight through, which ones a person reviews, and which ones stop.",
     chips: ["Credit risk", "2 min", "Live demo"],
     analogy: {
       heading: { before: "The", accent: "analogy" },
       paragraphs: [
         "Think of airport security. Most people walk through, a few get their bag opened, and the one whose name is on a list doesn't board.",
-        "The Risk Agent does that with credit cases. It reads the evidence on each one, sends the doubtful ones to a person and stops any case that shows up on a sanctions list, whatever the rest of its evidence says.",
+        "Risk triage does that with credit cases. It reads the evidence on each one, sends the doubtful ones to a person and stops any case that shows up on a sanctions list, whatever the rest of its evidence says.",
       ],
       dictionaryLabel: "In the diagram below",
       dictionary: [
