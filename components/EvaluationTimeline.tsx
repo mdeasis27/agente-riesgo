@@ -39,13 +39,13 @@ export function EvaluationTimeline({
     {
       id: 1,
       label: "Verificación de identidad",
-      description: "Truora · background check",
+      description: "API de verificación de identidad · background check",
       status: "pending",
     },
     {
       id: 2,
       label: "Búsqueda de evidencia",
-      description: "Exa.ai · búsqueda semántica",
+      description: "API de búsqueda web · búsqueda semántica",
       status: "pending",
     },
     {

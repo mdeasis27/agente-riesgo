@@ -1,0 +1,1 @@
+export const copy = { title: "Simulador de política de riesgo", briefing: "Cambia la evidencia y observa cómo una política operativa enruta un caso ficticio. Es una simulación local, no una predicción crediticia.", run: "Ejecutar escenario", verification: "Verificación", coverage: "Cobertura de evidencia", threshold: "Umbral de revisión", sanctioned: "Señal de screening" };

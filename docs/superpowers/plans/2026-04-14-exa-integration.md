@@ -1,10 +1,10 @@
-# Exa Integration — Implementation Plan
+# Web search API Integration — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Reescribir `lib/exa.ts` usando el SDK oficial `exa-js` con queries especializadas por contexto (crédito, contratación, onboarding).
 
-**Architecture:** `searchSubject` delega a `getStrategyForContext` que retorna un arreglo de queries con sus parámetros Exa. Las queries corren en paralelo con `Promise.allSettled`. Los resultados se deduplicán por URL (mayor score gana). La interfaz pública `ExaResult` y la firma de `searchSubject` no cambian — `agent.ts` y `route.ts` no requieren modificaciones.
+**Architecture:** `searchSubject` delega a `getStrategyForContext` que retorna un arreglo de queries con sus parámetros Web search API. Las queries corren en paralelo con `Promise.allSettled`. Los resultados se deduplicán por URL (mayor score gana). La interfaz pública `ExaResult` y la firma de `searchSubject` no cambian — `agent.ts` y `route.ts` no requieren modificaciones.
 
 **Tech Stack:** `exa-js` SDK, TypeScript, Next.js App Router (server-side).
 
@@ -58,7 +58,7 @@ git commit -m "chore: add exa-js SDK"
 - [ ] **Step 1: Reemplazar el contenido completo de `lib/exa.ts`**
 
 ```typescript
-import Exa from "exa-js";
+import Web search API from "exa-js";
 
 // ─── Tipos públicos ────────────────────────────────────────────────────────────
 
@@ -174,7 +174,7 @@ export async function searchSubject(params: {
     ];
   }
 
-  const exa = new Exa(process.env.EXA_API_KEY);
+  const exa = new Web search API(process.env.EXA_API_KEY);
   const queries = getStrategyForContext(
     params.name,
     params.country ?? "",

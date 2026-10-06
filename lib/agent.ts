@@ -77,7 +77,7 @@ Responde ÚNICAMENTE con un objeto JSON válido, sin markdown ni texto adicional
   const userContent = `SUJETO: ${safeName}
 CONTEXTO: ${safeContext}
 
-VALIDACIÓN DE IDENTIDAD (Truora):
+VALIDACIÓN DE IDENTIDAD (proveedor configurado):
 - Identidad confirmada: ${params.truora.identity_confirmed}
 - Sanciones: ${params.truora.sanctions_hit ? "POSITIVO — ALERTA" : "limpio"}
 - PEP: ${params.truora.pep_hit ? "SÍ" : "NO"}

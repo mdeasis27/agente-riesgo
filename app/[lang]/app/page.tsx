@@ -1,0 +1,3 @@
+import { notFound } from "next/navigation";
+import { Experience } from "@/components/experience/experience";
+export default async function Page({ params }: { params: Promise<{ lang: string }> }) { const {lang}=await params; if(lang!=="en"&&lang!=="es") notFound(); return <Experience lang={lang}/>; }
