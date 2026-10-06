@@ -1,38 +1,91 @@
 "use client";
-import { useEffect, useState } from "react";
-import { OutcomeBlock, ScenarioPicker, StoryStage } from "@/design-system/demo/decision-lab";
+import { useState } from "react";
 import { TracePlayer } from "@/design-system/demo/trace-player";
+import { MissionPrompt, MissionComparison } from "@/design-system/demo/mission-lab";
 import { useDemoRun } from "@/design-system/demo/use-demo-run";
-import { type ExperienceInput, type ExperienceResult } from "@/lib/experience/adapter";
-import { MissionBrief, MissionPrompt, MissionComparison, DecisionNotes } from "@/design-system/demo/mission-lab";
+import { StoryHero, StorySection, AnalogyBlock, WhyIBuiltIt, FitGuide, ProvesBlock, EngineerNotes } from "@/design-system/demo/project-story";
+import { LanguageSwitch } from "@/design-system/components/language-switch";
+import { traceCopy } from "@/lib/experience/trace-copy";
 import { runMission } from "@/lib/experience/mission";
-import { riskScenarios } from "@/lib/experience/story";
-import { Visualization } from "./visualization";
-const defaults: ExperienceInput = riskScenarios.clear;
-const decisionCopy = { proceed: { en: "Proceed", es: "Continuar" }, review: { en: "Review", es: "Revisar" }, stop: { en: "Stop", es: "Detener" } } as const;
-function outcome(result: ExperienceResult, lang: "en" | "es") {
-    const es = lang === "es";
-    const explanation = result.decision === "stop" ? (es ? "La señal de screening bloquea el avance y requiere una decisión humana." : "The screening signal blocks progress and requires a human decision.") : result.decision === "review" ? (es ? "La evidencia no alcanza el umbral de la política y pasa a revisión." : "Evidence does not meet the policy threshold and moves to review.") : (es ? "El puntaje de revisión queda por debajo de tu umbral y la política permite continuar; esto no valida la evidencia." : "The review score stays below your threshold, so policy allows progress; this does not validate the evidence.");
-    return { title: decisionCopy[result.decision][lang], explanation, tone: result.decision === "stop" ? "danger" as const : result.decision === "review" ? "warning" as const : "success" as const };
-}
-export function Experience({ lang }: {
-    lang: "en" | "es";
-}) {
-    const es = lang === "es";
-    const [input, setInput] = useState(defaults);
-    const [selected, setSelected] = useState<"clear" | "blocked" | "custom">("clear");
-    const [prediction, setPrediction] = useState<string | null>(null);
-    const demo = useDemoRun(runMission);
-    const clear = () => { setPrediction(null); demo.reset(); };
-    useEffect(() => { demo.cancel(); }, [input.verification, input.sanctions, input.evidenceCoverage, input.reviewThreshold]);
-    const change = (next: ExperienceInput) => { setInput(next); setSelected("custom"); clear(); };
-    const choose = (id: "clear" | "blocked") => { setInput(riskScenarios[id]); setSelected(id); clear(); };
-    const reset = () => { setInput(defaults); setSelected("clear"); clear(); };
-    return <main className="mx-auto max-w-6xl px-5 py-10"><div className="flex justify-between gap-3"><a href={`/${lang}`}>← {es ? "Portafolio" : "Portfolio"}</a><a href={`/${es ? "en" : "es"}/app`}>{es ? "EN" : "ES"}</a></div><p className="mt-2 text-xs text-muted-foreground">{es ? "Cambiar idioma reinicia el escenario local." : "Changing language resets the local scenario."}</p><div className="mt-6"><MissionBrief locale={lang} name="AGENTE RIESGO" title={es ? "¿Revisarías un caso con evidencia parcial?" : "Would you review a case with partial evidence?"} context={es ? "Un equipo de operaciones debe decidir qué casos pasan a revisión humana. Cambia el umbral con la misma evidencia y observa la ruta; es una simulación de política, no una predicción de crédito." : "An operations team decides which cases need human review. Change the threshold on the same evidence and inspect the route; this is a policy simulation, not a credit prediction."} role={es ? "Responsable de operaciones de riesgo" : "Risk operations lead"} stakes={es ? "Revisión humana y avance de casos" : "Human review and case progression"}/></div><div className="grid gap-6 lg:grid-cols-[330px_1fr]"><section className="min-w-0" aria-label={es ? "Controles del escenario" : "Scenario controls"}><button type="button" data-mission-challenge className="mb-5 rounded-lg border border-accent px-4 py-3 text-sm" onClick={() => change({ verification: "confirmed", sanctions: false, evidenceCoverage: 40, reviewThreshold: 20 })}>{es ? "Probar el reto: evidencia parcial" : "Try the challenge: partial evidence"} →</button><ScenarioPicker locale={lang} selected={selected} onSelect={(id) => choose(id as "clear" | "blocked")} options={[{ id: "clear", label: es ? "Caso limpio" : "Clear case", description: es ? "Las tres compuertas permiten el avance." : "All three gates permit progress." }, { id: "blocked", label: es ? "Señal bloqueante" : "Blocking signal", description: es ? "El screening envía el caso a detener." : "Screening sends the case to stop." }]}/><label className="block text-sm font-medium">{es ? "Verificación" : "Verification"}<select className="mt-1 w-full rounded border border-border bg-background p-2" value={input.verification} onChange={(event) => change({ ...input, verification: event.target.value as ExperienceInput["verification"] })}><option value="confirmed">{es ? "Confirmada" : "Confirmed"}</option><option value="missing">{es ? "Ausente" : "Missing"}</option></select></label><label className="mt-3 block text-sm font-medium">{es ? "Cobertura de evidencia" : "Evidence coverage"}: {input.evidenceCoverage}%<input className="mt-1 w-full" type="range" min="0" max="100" value={input.evidenceCoverage} onChange={(event) => change({ ...input, evidenceCoverage: Number(event.target.value) })}/></label><label className="mt-3 block text-sm font-medium">{es ? "Umbral de revisión" : "Review threshold"}: {input.reviewThreshold}<input className="mt-1 w-full" type="range" min="0" max="100" value={input.reviewThreshold} onChange={(event) => change({ ...input, reviewThreshold: Number(event.target.value) })}/></label><label className="mt-3 flex gap-2 text-sm"><input type="checkbox" checked={input.sanctions} onChange={(event) => change({ ...input, sanctions: event.target.checked })}/>{es ? "Señal de sanciones" : "Sanctions signal"}</label>{demo.error && <p className="mt-4 rounded border border-danger bg-danger/10 p-3 text-sm text-danger" role="alert">{es ? "La cobertura y el umbral deben estar entre 0 y 100." : demo.error}</p>}<MissionPrompt locale={lang} question={es ? "Con tu umbral y estas señales, ¿qué ruta tomará el caso?" : "With your threshold and these signals, which route will the case take?"} prediction={prediction} onPredict={setPrediction} locked={Boolean(demo.run) || demo.running} options={[{ id: "proceed", label: es ? "Continuar" : "Proceed" }, { id: "review", label: es ? "Revisar" : "Review" }, { id: "stop", label: es ? "Detener" : "Stop" }]}/><button data-run-experiment className="mt-4 w-full rounded bg-accent p-2 font-medium text-white disabled:opacity-60" disabled={demo.running} onClick={() => demo.execute(input)}>{demo.running ? (es ? "Evaluando…" : "Evaluating…") : (es ? "Ejecutar escenario" : "Run scenario")}</button><div className="mt-3 flex gap-2"><button type="button" className="rounded border border-border px-3 py-2 text-sm" onClick={demo.cancel}>{es ? "Cancelar" : "Cancel"}</button><button type="button" className="rounded border border-border px-3 py-2 text-sm" onClick={reset}>{es ? "Restaurar" : "Reset"}</button></div></section><div className="min-w-0 space-y-5"><TracePlayer collapsible trace={demo.trace} locale={lang} executionMs={demo.run?.executionMs} translate={(key) => ({ verification: es ? "Verificación documental" : "Document verification", screening: es ? "Screening de sanciones" : "Sanctions screening", decision: es ? "Aplicación de política" : "Policy application" }[key] ?? key)} renderStage={(frame) => {
-            const result = demo.run?.result;
-            return <StoryStage locale={lang} title={es ? "Compuertas de decisión" : "Decision gates"} caption={es ? "Cada compuerta revela su señal; la ruta final aparece al completar la reproducción." : "Each gate reveals its signal; the final route appears after playback completes."} step={frame.visible} total={frame.total}><Visualization input={demo.run?.input ?? input} visible={frame.visible} result={result} lang={lang}/>{frame.complete && result && <div className="mt-6"><OutcomeBlock {...outcome(result, lang)}/><MissionComparison locale={lang} prediction={prediction} actual={result.decision} actualLabel={es ? `Tu política indica: ${decisionCopy[result.decision][lang]}.` : `Your policy routes this case to ${decisionCopy[result.decision][lang].toLowerCase()}.`} sides={[
-                        { label: es ? "Umbral de revisión: 20" : "Review threshold: 20", value: decisionCopy[result.comparison.cautious.decision][lang], detail: es ? "Un puntaje de revisión de 20 o más activa revisión humana." : "A review score of 20 or more triggers human review." },
-                        { label: es ? "Umbral de revisión: 50" : "Review threshold: 50", value: decisionCopy[result.comparison.permissive.decision][lang], detail: es ? "Exige un puntaje de revisión de 50 o más para escalar." : "Requires a review score of 50 or more to escalate." }
-                    ]} explanation={es ? "Misma verificación, screening y cobertura; solo cambia el umbral. Puntaje = 55 si falta verificación + (100 − cobertura) / 2. Una señal de sanciones detiene el caso con ambos umbrales. No estima riesgo crediticio ni tasas reales de error." : "Same verification, screening and coverage; only the threshold changes. Score = 55 for missing verification + (100 − coverage) / 2. A sanctions signal stops the case under either threshold. This does not estimate credit risk or real error rates."}/></div>}</StoryStage>;
-        }}/></div></div><DecisionNotes locale={lang} implementation={es ? "Tres señales locales y una fórmula de política determinista." : "Three local signals and a deterministic policy formula."} rationale={es ? "Separar señales y política permite inspeccionar qué cambio envía un caso a revisión; ningún umbral es óptimo sin datos etiquetados." : "Separating signals from policy makes the review decision inspectable; neither threshold is optimal without labeled data."} production={es ? "Validar falsos positivos, falsos negativos, equidad, privacidad, revisión humana y reglas aplicables con especialistas y casos reales." : "Validate false positives, false negatives, fairness, privacy, human review and applicable rules with specialists and real cases."}/></main>;
+import { CASES } from "@/lib/experience/batch";
+import { RiesgoStoryScene } from "@/lib/experience/story-scene";
+import { COMPLETE_FRAME } from "@/lib/experience/scene-state";
+import { STORY } from "@/lib/experience/story";
+
+const REPO = "https://github.com/mdeasis27/agente-riesgo";
+const DEFAULT_THRESHOLD = 30;
+
+export function Experience({ lang: locale }: { lang: "en" | "es" }) {
+  const t = STORY[locale];
+  const [threshold, setThreshold] = useState(DEFAULT_THRESHOLD);
+  const [prediction, setPrediction] = useState<string | null>(null);
+  const demo = useDemoRun(runMission);
+  const run = demo.run;
+  const result = run?.result;
+  // Section 03 waits for the tape to finish; keyed to the trace so every new run resets it.
+  const [playedTrace, setPlayedTrace] = useState<typeof demo.trace | null>(null);
+  const played = demo.trace.length === 0 || playedTrace === demo.trace;
+  const clear = () => { setPrediction(null); demo.reset(); };
+  const reset = () => { setThreshold(DEFAULT_THRESHOLD); clear(); };
+  const scene = (frame: typeof COMPLETE_FRAME) => result ? <RiesgoStoryScene frame={frame} result={result} locale={locale} /> : null;
+  const through = result?.counts.proceed ?? 0;
+
+  return <main className="mx-auto max-w-5xl px-5 py-8 text-foreground sm:py-12">
+    <div className="mb-6 flex items-center justify-between gap-4">
+      <a className="font-mono text-xs text-muted-foreground underline-offset-4 hover:underline" href={`/${locale}`}>← {t.name}</a>
+      <LanguageSwitch locale={locale} />
+    </div>
+    <StoryHero name={t.name} oneLiner={t.oneLiner} chips={t.chips} />
+
+    <StorySection index={1} heading={t.analogy.heading}>
+      <AnalogyBlock paragraphs={t.analogy.paragraphs} dictionaryLabel={t.analogy.dictionaryLabel} dictionary={t.analogy.dictionary} />
+    </StorySection>
+
+    <WhyIBuiltIt title={t.why.title} text={t.why.text} />
+
+    <StorySection index={2} heading={t.tryIt.heading} lead={t.tryIt.lead}>
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,.8fr)_minmax(0,1.2fr)]">
+        <section className="min-w-0 rounded-xl border border-border bg-surface p-5">
+          <MissionPrompt locale={locale} question={t.tryIt.question(threshold)} prediction={prediction} onPredict={setPrediction} locked={Boolean(run) || demo.running} options={[{ id: "yes", label: t.tryIt.yes }, { id: "no", label: t.tryIt.no }]} />
+          <label className="mt-5 block text-sm">
+            <span className="flex justify-between"><span>{t.tryIt.thresholdLabel}</span><span className="font-mono">{threshold}</span></span>
+            <input aria-label={t.tryIt.thresholdLabel} className="mt-2 w-full" type="range" min="0" max="100" step="5" value={threshold} onChange={e => { setThreshold(Number(e.target.value)); clear(); }} />
+            <span className="mt-1 block text-xs text-muted-foreground">{t.tryIt.thresholdHint}</span>
+          </label>
+          <p className="mt-4 text-xs leading-5 text-muted-foreground">{t.tryIt.note}</p>
+          <div className="mt-6 flex flex-wrap gap-2">
+            <button type="button" data-run-experiment disabled={demo.running} className="min-w-0 flex-1 rounded-lg bg-accent px-4 py-3 text-sm font-medium text-white disabled:opacity-60" onClick={() => demo.execute({ reviewThreshold: threshold })}>{t.tryIt.simulate}</button>
+            <button type="button" className="rounded-lg border border-border px-3 py-3 text-sm" onClick={demo.cancel}>{t.tryIt.cancel}</button>
+            <button type="button" className="rounded-lg border border-border px-3 py-3 text-sm" onClick={reset}>{t.tryIt.reset}</button>
+          </div>
+          {demo.error ? <p role="alert" className="mt-3 text-sm text-danger">{t.tryIt.error}</p> : null}
+        </section>
+        <section className="min-w-0">
+          {run && result
+            ? (demo.trace.length === 0 ? scene(COMPLETE_FRAME) : <TracePlayer collapsible autoPlay headingLevel="h3" onComplete={() => setPlayedTrace(demo.trace)} translate={key => traceCopy(locale, key)} trace={demo.trace} locale={locale} executionMs={run.executionMs} renderStage={scene} />)
+            : <p className="rounded-xl border border-dashed border-border p-8 text-sm text-muted-foreground">{t.tryIt.idle}</p>}
+        </section>
+      </div>
+    </StorySection>
+
+    <StorySection index={3} heading={t.compare.heading} lead={t.compare.lead}>
+      {result && played ? <MissionComparison locale={locale} prediction={prediction} actual={through > CASES.length / 2 ? "yes" : "no"} actualLabel={t.scene.throughOf(through)} explanation={t.compare.sentence(result.comparison.withCheck, result.comparison.withoutCheck)} sides={[
+        { label: t.compare.withCheck, value: `${result.comparison.withCheck}`, detail: t.compare.slipped, positive: result.comparison.withCheck < result.comparison.withoutCheck },
+        { label: t.compare.withoutCheck, value: `${result.comparison.withoutCheck}`, detail: t.compare.slipped },
+      ]} /> : null}
+    </StorySection>
+
+    <StorySection index={4} heading={t.fit.heading}>
+      <FitGuide worthLabel={t.fit.worthLabel} worth={t.fit.worth} notLabel={t.fit.notLabel} not={t.fit.not} />
+    </StorySection>
+
+    <StorySection index={5} heading={t.proves.heading}>
+      <ProvesBlock text={t.proves.text} />
+    </StorySection>
+
+    <EngineerNotes summary={t.engineers.summary}>
+      <ul className="list-disc space-y-2 pl-5">{t.engineers.points.map(p => <li key={p}>{p}</li>)}</ul>
+      <a className="mt-4 inline-block text-accent underline underline-offset-4" href={REPO}>{t.engineers.repoLabel} →</a>
+    </EngineerNotes>
+  </main>;
 }
