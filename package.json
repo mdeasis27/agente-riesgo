@@ -17,14 +17,14 @@
     "ai": "^6.0.159",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "exa-js": "^2.11.0",
+    "exa-js": "^2.28.0",
     "lucide-react": "^1.8.0",
-    "next": "16.2.3",
+    "next": "16.4.6",
     "next-themes": "^0.4.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "tailwind-merge": "^3.5.0",
-    "zod": "^4.3.6"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -32,9 +32,9 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.3",
+    "eslint-config-next": "16.4.6",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "tsx": "4.21.0"
+    "tsx": "4.21.0",
+    "typescript": "^5"
   }
 }
